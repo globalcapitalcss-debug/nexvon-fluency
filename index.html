@@ -14,16 +14,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script>
-/* Loader robusto do Supabase — 2 CDNs; se falhar, site funciona offline */
-window._sbOK=false;
-function _sbWarn(){if(!window._sbOK){document.addEventListener('DOMContentLoaded',function(){
-var b=document.createElement('div');
-b.style.cssText='position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:99999;background:#EF4444;color:#fff;padding:10px 20px;border-radius:10px;font-size:12px;font-weight:600;max-width:92%;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.5)';
-b.innerHTML='⚠️ Supabase offline — site funciona com cache local. Recarregue a página.';
-document.body.appendChild(b);setTimeout(function(){b.style.opacity='.6';},8000);
-});}}
-</script>
+<script>window._sbOK=false;function _sbWarn(){if(!window._sbOK){document.addEventListener('DOMContentLoaded',function(){var b=document.createElement('div');b.style.cssText='position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:99999;background:#EF4444;color:#fff;padding:10px 20px;border-radius:10px;font-size:12px;font-weight:600;max-width:92%;text-align:center';b.innerHTML='⚠️ Supabase offline — site funciona com cache local.';document.body.appendChild(b);});}}</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onload="window._sbOK=true" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2';this.onload=function(){window._sbOK=true;};this.onerror=_sbWarn;"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -86,6 +77,9 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 .fade-up{opacity:0;transform:translateY(30px);animation:fadeUp .8s ease forwards}
 @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
 .delay-1{animation-delay:.1s}.delay-2{animation-delay:.2s}.delay-3{animation-delay:.3s}
+
+.eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:16px;z-index:5;padding:4px;}
+.eye-btn:hover{color:#D4AF37;}.pass-wrap{position:relative;}.pass-wrap input{padding-right:38px;}
 </style>
 </head>
 <body>
@@ -110,6 +104,28 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 </div>
 </nav>
 
+
+<div id="adm-operadores" class="adm-content hidden">
+  <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-gold"><i class="fa fa-user-shield mr-2"></i> Operadores</h3><button onclick="openOperatorModal()" class="btn btn-gold"><i class="fa fa-plus mr-1"></i> Novo</button></div>
+  <div class="card-premium p-4 overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-left text-gray-400 border-b border-white/10"><th class="py-2">Nome</th><th>Usuário</th><th>Permissões</th><th>Status</th><th>Ações</th></tr></thead><tbody id="operatorsTable"></tbody></table></div>
+</div>
+<div id="operatorModal" class="modal-overlay"><div class="modal-content max-w-md">
+  <div class="flex justify-between items-center mb-4"><h3 id="operatorModalTitle" class="text-lg font-bold text-gold">Novo Operador</h3><button onclick="closeModal('operatorModal')" class="text-gray-400 text-xl">&times;</button></div>
+  <div class="space-y-3">
+    <input type="hidden" id="opId"><input type="text" id="opName" placeholder="Nome completo" class="input-premium w-full"><input type="text" id="opUsername" placeholder="Usuário" class="input-premium w-full">
+    <div class="pass-wrap"><input type="password" id="opPass" placeholder="Senha" class="input-premium w-full"><button type="button" class="eye-btn" onclick="togglePass('opPass',this)"><i class="fa fa-eye"></i></button></div>
+    <div class="grid grid-cols-2 gap-2 text-sm">
+      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="vendas" checked> Vendas</label>
+      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="afiliados" checked> Afiliados</label>
+      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="comissoes" checked> Comissões</label>
+      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="relatorios"> Relatórios</label>
+      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="configuracoes"> Configurações</label>
+      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="operadores"> Operadores</label>
+    </div>
+    <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="opActive" checked> Ativo</label>
+    <button onclick="saveOperator()" class="btn btn-gold w-full justify-center py-3">Salvar</button>
+  </div>
+</div></div>
 <div id="toast" class="toast"></div>
 
 <div id="page-home" class="page-section active">
@@ -328,7 +344,7 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 <h2 class="text-xl font-bold mb-4 text-center font-display">Entrar com Código + Senha</h2>
 <div class="space-y-3">
 <input type="text" id="loginCode" placeholder="Seu código de afiliado" style="text-transform:uppercase;text-align:center">
-<input type="password" id="loginPass" placeholder="Sua senha" style="text-align:center">
+<div class="pass-wrap"><input type="password" id="loginPass" placeholder="Sua senha" style="text-align:center"><button type="button" class="eye-btn" onclick="togglePass('loginPass',this)"><i class="fa fa-eye"></i></button></div>
 <button onclick="affLogin()" class="w-full bg-nexvon-affiliate text-white py-3 rounded-xl font-bold hover:opacity-90 btn-premium"><i class="fa fa-sign-in-alt mr-2"></i> Entrar</button>
 </div>
 <div class="mt-6 text-center border-t border-white/10 pt-4">
@@ -344,8 +360,8 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 <input type="text" id="regWhats" placeholder="WhatsApp com DDD * (ex: 19999998888)">
 <input type="email" id="regEmail" placeholder="E-mail">
 <input type="text" id="regCode" placeholder="Código de afiliado desejado (ex: JOAO10)" style="text-transform:uppercase">
-<input type="password" id="regPass" placeholder="Crie uma senha *">
-<input type="password" id="regPass2" placeholder="Confirme sua senha *">
+<div class="pass-wrap"><input type="password" id="regPass" placeholder="Crie uma senha *"><button type="button" class="eye-btn" onclick="togglePass('regPass',this)"><i class="fa fa-eye"></i></button></div>
+<div class="pass-wrap"><input type="password" id="regPass2" placeholder="Confirme sua senha *"><button type="button" class="eye-btn" onclick="togglePass('regPass2',this)"><i class="fa fa-eye"></i></button></div>
 <button onclick="affRegister()" class="w-full gold-gradient text-black py-3 rounded-xl font-bold btn-premium"><i class="fa fa-paper-plane mr-2"></i> Enviar Cadastro</button>
 </div>
 <p class="text-xs text-gray-500 text-center mt-4">Após aprovação, você receberá acesso pelo WhatsApp.</p>
@@ -377,7 +393,7 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 </div>
 <div id="afftab-perfil" class="aff-tab-content hidden">
 <div class="card-premium p-5 mb-4"><h3 class="font-bold mb-4 text-gold font-display"><i class="fa fa-university mr-2"></i> Dados Bancários para Recebimento</h3><div class="grid md:grid-cols-2 gap-3"><input type="text" id="bankHolder" placeholder="Titular da conta (nome completo) *"><input type="text" id="bankCPF" placeholder="CPF / CNPJ *"><input type="text" id="bankName" placeholder="Banco (ex: Bradesco, Nubank) *"><input type="text" id="bankAgency" placeholder="Agência *"><input type="text" id="bankAccount" placeholder="Conta com dígito *"><select id="bankType"><option value="corrente">Conta Corrente</option><option value="poupanca">Conta Poupança</option><option value="pagamento">Conta Pagamento</option></select><input type="text" id="bankPix" placeholder="Chave PIX (opcional)"></div><button onclick="saveBankProfile()" class="btn btn-gold mt-4 btn-premium"><i class="fa fa-save"></i> Salvar Dados Bancários</button><p class="text-xs text-gray-500 mt-3">Campos com * são obrigatórios. Sem eles, o saque fica bloqueado.</p></div>
-<div class="card-premium p-5"><h3 class="font-bold mb-4 text-gold font-display"><i class="fa fa-key mr-2"></i> Alterar Senha</h3><div class="grid md:grid-cols-2 gap-3"><input type="password" id="affNewPass" placeholder="Nova senha"><input type="password" id="affNewPass2" placeholder="Confirmar nova senha"></div><button onclick="changeAffPass()" class="btn btn-gold mt-4 btn-premium"><i class="fa fa-save"></i> Alterar Senha</button></div>
+<div class="card-premium p-5"><h3 class="font-bold mb-4 text-gold font-display"><i class="fa fa-key mr-2"></i> Alterar Senha</h3><div class="grid md:grid-cols-2 gap-3"><div class="pass-wrap"><input type="password" id="affNewPass" placeholder="Nova senha"><button type="button" class="eye-btn" onclick="togglePass('affNewPass',this)"><i class="fa fa-eye"></i></button></div><div class="pass-wrap"><input type="password" id="affNewPass2" placeholder="Confirmar nova senha"><button type="button" class="eye-btn" onclick="togglePass('affNewPass2',this)"><i class="fa fa-eye"></i></button></div></div><button onclick="changeAffPass()" class="btn btn-gold mt-4 btn-premium"><i class="fa fa-save"></i> Alterar Senha</button></div>
 </div>
 <div id="afftab-saques" class="aff-tab-content hidden">
 <div class="glass rounded-xl overflow-x-auto"><table class="adm-table"><thead><tr><th>Data</th><th>Valor Solicitado</th><th>Status</th><th>Pagamento em</th></tr></thead><tbody id="affWithdrawTable"><tr><td colspan="4" class="text-center text-gray-500 py-6">Nenhum saque solicitado.</td></tr></tbody></table></div>
@@ -392,7 +408,8 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 <button onclick="showPage('home')" class="mb-6 text-nexvon-silver hover:text-white flex items-center gap-2"><i class="fa fa-arrow-left"></i> Voltar ao site</button>
 <div id="admin-login" class="max-w-md mx-auto card-premium p-8">
 <div class="text-center mb-6"><i class="fa fa-lock text-nexvon-admin text-4xl mb-3"></i><h2 class="text-xl font-bold font-display">Acesso Administrativo</h2></div>
-<input type="password" id="adminPassInput" placeholder="Senha administrativa" style="text-align:center" class="mb-4">
+<div class="pass-wrap"><input type="text" id="adminUserInput" placeholder="Usuário (opcional — branco=admin master)" style="text-align:center" class="mb-2">
+        <input type="password" id="adminPassInput" placeholder="Senha administrativa" style="text-align:center" class="mb-4"><button type="button" class="eye-btn" onclick="togglePass('adminPassInput',this)"><i class="fa fa-eye"></i></button></div>
 <button onclick="adminLogin()" class="w-full bg-nexvon-admin text-white py-3 rounded-xl font-bold hover:opacity-90 btn-premium"><i class="fa fa-unlock-alt mr-2"></i> Acessar Painel</button>
 </div>
 <div id="admin-dashboard" class="hidden">
@@ -403,6 +420,7 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 <button class="admin-tab px-4 py-2 text-sm font-semibold text-gray-400" data-tab="affiliates">🤝 Afiliados</button>
 <button class="admin-tab px-4 py-2 text-sm font-semibold text-gray-400" data-tab="commissions">💵 Comissões</button>
 <button class="admin-tab px-4 py-2 text-sm font-semibold text-gray-400" data-tab="settings">⚙️ Configurações</button>
+          <button class="admin-tab px-4 py-2 text-sm font-semibold text-gray-400" data-tab="operadores"><i class="fa fa-user-shield mr-1"></i> Operadores</button>
 </div>
 <div id="adm-dashboard" class="adm-content">
 <div class="flex items-center gap-3 mb-4 flex-wrap"><button class="btn btn-gold btn-premium" onclick="exportPDF()"><i class="fa fa-file-pdf"></i> Exportar Relatório em PDF</button><span class="text-xs text-gray-500">Inclui vendas, comissões e afiliados</span></div>
@@ -432,7 +450,7 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 </div>
 <div id="adm-settings" class="adm-content hidden">
 <div class="grid md:grid-cols-2 gap-5">
-<div class="card-premium p-5"><h4 class="font-bold mb-4 text-gold font-display">🔐 Alterar Senha Admin</h4><input type="password" id="newPass" placeholder="Nova senha" class="mb-3"><button class="btn btn-gold btn-premium" onclick="changeAdminPass()">Salvar Senha</button></div>
+<div class="card-premium p-5"><h4 class="font-bold mb-4 text-gold font-display">🔐 Alterar Senha Admin</h4><div class="pass-wrap"><input type="password" id="newPass" placeholder="Nova senha" class="mb-3"><button type="button" class="eye-btn" onclick="togglePass('newPass',this)"><i class="fa fa-eye"></i></button></div><button class="btn btn-gold btn-premium" onclick="changeAdminPass()">Salvar Senha</button></div>
 <div class="card-premium p-5"><h4 class="font-bold mb-4 text-gold font-display">💰 Comissão Padrão (%)</h4><input type="number" id="defComm" value="20" class="mb-3"><button class="btn btn-gold btn-premium" onclick="saveDefComm()">Salvar</button></div>
 <div class="card-premium p-5 md:col-span-2"><h4 class="font-bold mb-4 text-nexvon-infinitepay font-display"><i class="fa fa-globe mr-2"></i> URL Oficial do Site (para links de afiliado)</h4><input type="text" id="setSiteUrl" value="https://nexvonfluency.com.br/" class="mb-3"><button class="btn btn-gold btn-premium" onclick="saveSiteUrl()"><i class="fa fa-save"></i> Salvar URL</button><p class="text-xs text-gray-500">Os links de afiliado e compartilhamento usarão este domínio. Padrão: https://nexvonfluency.com.br/</p></div>
 <div class="card-premium p-5 md:col-span-2"><h4 class="font-bold mb-4 text-nexvon-infinitepay font-display"><i class="fa fa-database mr-2"></i> Banco de Dados — Backup & Restauração</h4><button class="btn btn-gold mr-2 mb-2 btn-premium" onclick="downloadDB()"><i class="fa fa-download"></i> Baixar Backup (.json)</button><label class="btn btn-ghost cursor-pointer mb-2"><i class="fa fa-upload"></i> Restaurar Backup<input type="file" accept=".json" onchange="restoreDB(event)" style="display:none"></label><p class="text-xs text-gray-500 mt-2">Dados salvos no navegador. Atualize o site à vontade.</p></div>
@@ -480,7 +498,7 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 <div class="glass-strong border border-gray-700 rounded-2xl p-6 w-full max-w-md">
 <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold font-display" id="affModalTitle">Novo Afiliado</h3><button onclick="closeModal('affModal')" class="text-gray-400 hover:text-white"><i class="fa fa-times"></i></button></div>
 <input type="hidden" id="affId">
-<div class="space-y-3"><input type="text" id="affName" placeholder="Nome do Afiliado"><input type="text" id="affContact" placeholder="WhatsApp / E-mail"><div class="grid grid-cols-2 gap-3"><input type="text" id="affCode" placeholder="Código (ex: ANA10)"><input type="number" id="affComm" placeholder="Comissão %" step="0.1"></div><input type="password" id="affPass" placeholder="Senha do afiliado (padrão: 123456)"><button onclick="saveAff()" class="w-full btn justify-center py-3 btn-premium" style="background:#10B981;color:#fff"><i class="fa fa-save"></i> Cadastrar (já aprovado)</button></div>
+<div class="space-y-3"><input type="text" id="affName" placeholder="Nome do Afiliado"><input type="text" id="affContact" placeholder="WhatsApp / E-mail"><div class="grid grid-cols-2 gap-3"><input type="text" id="affCode" placeholder="Código (ex: ANA10)"><input type="number" id="affComm" placeholder="Comissão %" step="0.1"></div><div class="pass-wrap"><input type="password" id="affPass" placeholder="Senha do afiliado (padrão: 123456)"><button type="button" class="eye-btn" onclick="togglePass('affPass',this)"><i class="fa fa-eye"></i></button></div><button onclick="saveAff()" class="w-full btn justify-center py-3 btn-premium" style="background:#10B981;color:#fff"><i class="fa fa-save"></i> Cadastrar (já aprovado)</button></div>
 </div>
 </div>
 
@@ -504,445 +522,161 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 </div>
 </div>
 
-<script>
-/* ============================================================
-   NEXVON FLUENCY — Supabase integrado (com fallback offline)
-   Projeto: wpwmghgwqlrhvqjqfkav
-   ============================================================ */
-var SUPABASE_URL='https://wpwmghgwqlrhvqjqfkav.supabase.co';
+<script>var SUPABASE_URL='https://wpwmghgwqlrhvqjqfkav.supabase.co';
 var SUPABASE_ANON_KEY='sb_publishable_jb5IABPi0WR7tYgu9Ico-Q_vFzRzo8Y';
 var supabase=null;
-try{ if(window.supabase&&window.supabase.createClient){ supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); } }catch(e){ console.warn('Supabase init falhou:',e); }
-/* Wrappers seguros — nunca quebram o site */
-function sbRpc(fn,params){ if(!supabase) return Promise.resolve({data:null,error:{message:'offline'}}); try{ return supabase.rpc(fn,params); }catch(e){ return Promise.resolve({data:null,error:{message:e.message}}); } }
-function sbFrom(table){
-  if(!supabase) return { insert:function(){return Promise.resolve({error:{message:'offline'}});}, select:function(){return { eq:function(){return { maybeSingle:function(){return Promise.resolve({data:null,error:{message:'offline'}});} };} };} };
-  return supabase.from(table);
-}
-/* Erros globais não quebram o site */
-window.addEventListener('error',function(e){ console.error('JS:',e.message); });
-window.addEventListener('unhandledrejection',function(e){ console.warn('Promise:',e.reason); });
+try{if(window.supabase&&window.supabase.createClient)supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);}catch(e){console.warn('SB init:',e);}
+function sbRpc(fn,p){if(!supabase)return Promise.resolve({data:null,error:{message:'offline'}});try{return supabase.rpc(fn,p);}catch(e){return Promise.resolve({data:null,error:{message:e.message}});}}
+function sbFrom(t){if(!supabase)return{insert:function(){return Promise.resolve({error:{message:'offline'}});},select:function(){return{eq:function(){return{maybeSingle:function(){return Promise.resolve({data:null,error:{message:'offline'}});}};}};}};return supabase.from(t);}
+window.addEventListener('error',function(e){console.error('JS:',e.message);});
+function togglePass(id,btn){var el=document.getElementById(id);if(!el)return;if(el.type==='password'){el.type='text';btn.innerHTML='<i class="fa fa-eye-slash"></i>';}else{el.type='password';btn.innerHTML='<i class="fa fa-eye"></i>';}}
+var OP_SESS='nf_op_session';
+function currentOp(){try{return JSON.parse(sessionStorage.getItem(OP_SESS)||'null');}catch(e){return null;}}
+function applyOpPermissions(){var op=currentOp();if(!op)return;var perms=op.permissions||[];var map={sales:'vendas',affiliates:'afiliados',commissions:'comissoes',settings:'configuracoes',operadores:'operadores'};document.querySelectorAll('.admin-tab').forEach(function(t){var tab=t.dataset.tab;if(tab==='dashboard')return;if(perms.indexOf(map[tab])<0)t.style.display='none';else t.style.display='';});}
+function openOperatorModal(){document.getElementById('operatorModalTitle').textContent='Novo Operador';document.getElementById('opId').value='';document.getElementById('opName').value='';document.getElementById('opUsername').value='';document.getElementById('opPass').value='';document.getElementById('opActive').checked=true;document.querySelectorAll('.op-perm').forEach(function(c){c.checked=['vendas','afiliados','comissoes'].indexOf(c.value)>=0;});document.getElementById('operatorModal').classList.add('open');}
+function editOperator(id){var op=(DB.operators||[]).find(function(o){return o.id===id;});if(!op)return;document.getElementById('operatorModalTitle').textContent='Editar';document.getElementById('opId').value=op.id;document.getElementById('opName').value=op.name;document.getElementById('opUsername').value=op.username;document.getElementById('opPass').value='';document.getElementById('opActive').checked=op.active!==false;document.querySelectorAll('.op-perm').forEach(function(c){c.checked=(op.permissions||[]).indexOf(c.value)>=0;});document.getElementById('operatorModal').classList.add('open');}
+function saveOperator(){var id=document.getElementById('opId').value;var name=document.getElementById('opName').value.trim();var username=document.getElementById('opUsername').value.trim().toLowerCase();var pass=document.getElementById('opPass').value;if(!name||!username){toast('Nome e usuário obrigatórios.','error');return;}if(!id&&!pass){toast('Defina uma senha.','error');return;}var perms=[];document.querySelectorAll('.op-perm:checked').forEach(function(c){perms.push(c.value);});var active=document.getElementById('opActive').checked;if(!DB.operators)DB.operators=[];if(id){var i=DB.operators.findIndex(function(o){return o.id===id;});DB.operators[i]=Object.assign({},DB.operators[i],{name:name,username:username,permissions:perms,active:active});if(pass)DB.operators[i].password=pass;}else{DB.operators.push({id:'OP'+Date.now(),name:name,username:username,password:pass,permissions:perms,active:active});}saveDB();closeModal('operatorModal');renderOperators();toast('Operador salvo!','success');}
+function delOperator(id){if(!confirm('Excluir?'))return;DB.operators=DB.operators.filter(function(o){return o.id!==id;});saveDB();renderOperators();}
+function renderOperators(){if(!DB.operators)DB.operators=[];var tb=document.getElementById('operatorsTable');if(!tb)return;tb.innerHTML=DB.operators.map(function(o){var p=(o.permissions||[]).join(',')||'—';var st=o.active===false?'<span class="badge bg-red-500/20 text-red-400">Inativo</span>':'<span class="badge bg-green-500/20 text-green-400">Ativo</span>';return '<tr class="border-b border-white/5"><td class="py-3 font-semibold">'+o.name+'</td><td class="font-mono text-xs">'+o.username+'</td><td class="text-xs text-gray-400">'+p+'</td><td>'+st+'</td><td><button class="btn btn-ghost text-xs" onclick="editOperator(\''+o.id+'\')"><i class="fa fa-edit"></i></button> <button class="btn btn-danger text-xs" onclick="delOperator(\''+o.id+'\')"><i class="fa fa-trash"></i></button></td></tr>';}).join('')||'<tr><td colspan="5" class="text-center text-gray-500 py-6">Nenhum operador.</td></tr>';applyOpPermissions();}
 
-var WA='5519997048175';
-var CHECKOUT='https://loja.infinitepay.io/alessandro-silva-icw/jjf3483-assinatura-nexvon-fluency';
-var DB_KEY='nexvon_db_v3';
-var AFF_SESS='nexvon_aff_session';
-var ADMIN_PASS_KEY='nf_admin_pass';
-var BRL=function(v){return 'R$ '+Number(v||0).toFixed(2).replace('.',',');};
-var BASE_USD=99;var PIX_DISCOUNT=0.10;var PRICE_BRL=540;
-var SITE_URL='https://nexvonfluency.com.br/';
-
-function defaultDB(){return {version:'3.0',settings:{defaultCommission:20,productPrice:540,siteUrl:'https://nexvonfluency.com.br/'},affiliates:[],sales:[],clicks:{},paidCommissions:{}};}
-function loadDBCache(){try{var s=localStorage.getItem(DB_KEY);return s?JSON.parse(s):defaultDB();}catch(e){return defaultDB();}}
-function saveDBCache(){try{localStorage.setItem(DB_KEY,JSON.stringify(DB));}catch(e){}}
-var DB=loadDBCache();
-if(DB.settings.siteUrl)SITE_URL=DB.settings.siteUrl;
-
-/* Sincronização com Supabase (fire-and-forget, nunca bloqueia) */
-var _syncing=false;
-function syncToSupabase(){
-  if(_syncing||!supabase)return;_syncing=true;
-  var adminPass=sessionStorage.getItem(ADMIN_PASS_KEY);
-  if(!adminPass){_syncing=false;return;}
-  var payload={settings:{site:DB.settings},affiliates:DB.affiliates.map(function(a){var o={};for(var k in a){if(k!=='password'&&k!=='password_hash')o[k]=a[k];}return o;}),sales:DB.sales,clicks:DB.clicks,paidCommissions:DB.paidCommissions};
-  sbRpc('admin_save_all',{admin_pass:adminPass,payload:payload}).then(function(r){if(r&&r.error&&r.error.message!=='offline')console.warn('sync:',r.error.message);}).catch(function(){}).finally(function(){_syncing=false;});
-}
-function saveDB(){saveDBCache();setTimeout(syncToSupabase,50);}
-
-function applyServerData(all){
-  if(!all||all.error)return;
-  if(all.settings&&all.settings.site)DB.settings=Object.assign({},DB.settings,all.settings.site);
-  if(all.affiliates)DB.affiliates=all.affiliates;
-  if(all.sales)DB.sales=all.sales;
-  if(all.clicks)DB.clicks=all.clicks||{};
-  if(all.paidCommissions)DB.paidCommissions=all.paidCommissions||{};
-  if(DB.settings.siteUrl)SITE_URL=DB.settings.siteUrl;
-  saveDBCache();
-}
-
-function loadPublicSettings(){
-  sbFrom('settings').select('value').eq('key','site').maybeSingle().then(function(r){
-    if(r&&r.data&&r.data.value){DB.settings=Object.assign({},DB.settings,r.data.value);if(DB.settings.siteUrl)SITE_URL=DB.settings.siteUrl;saveDBCache();}
-  }).catch(function(){});
-}
-
-function toast(msg,type){type=type||'info';var t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;setTimeout(function(){t.classList.remove('show');},4000);}
-
-function showPage(p){
-  document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active');});
-  document.getElementById('page-'+p).classList.add('active');
-  window.scrollTo(0,0);
-  if(p==='admin'&&localStorage.getItem('nf_admin')==='1'&&sessionStorage.getItem(ADMIN_PASS_KEY)){
-    document.getElementById('admin-login').classList.add('hidden');
-    document.getElementById('admin-dashboard').classList.remove('hidden');
-    renderAll();
-  }
-  if(p==='affiliate')checkAffSession();
-}
+const WA='5519997048175';
+const CHECKOUT='https://loja.infinitepay.io/alessandro-silva-icw/jjf3483-assinatura-nexvon-fluency';
+const DB_KEY='nexvon_db_v3';const PASS_KEY='nexvon_admin_pass';const AFF_SESS='nexvon_aff_session';
+const BRL=v=>'R$ '+Number(v||0).toFixed(2).replace('.',',');
+const BASE_USD=99;const PIX_DISCOUNT=0.10;const PRICE_BRL=540;
+let SITE_URL='https://nexvonfluency.com.br/';
+function defaultDB(){return {version:'3.0',settings:{defaultCommission:20,productPrice:540,siteUrl:'https://nexvonfluency.com.br/'},affiliates:[],sales:[],clicks:{},paidCommissions:{},operators:[]};}
+function loadDB(){try{const s=localStorage.getItem(DB_KEY);return s?JSON.parse(s):defaultDB();}catch(e){return defaultDB();}}
+function saveDB(){localStorage.setItem(DB_KEY,JSON.stringify(DB));try{fetch('/api/db',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(DB)}).catch(()=>{});}catch(e){}}
+let DB=loadDB();if(DB.settings.siteUrl)SITE_URL=DB.settings.siteUrl;
+function getPass(){return localStorage.getItem(PASS_KEY)||'admin123';}
+function toast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;setTimeout(()=>t.classList.remove('show'),4000);}
+function showPage(p){document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));document.getElementById('page-'+p).classList.add('active');window.scrollTo(0,0);if(p==='admin'&&localStorage.getItem('nf_admin')==='1'){document.getElementById('admin-login').classList.add('hidden');document.getElementById('admin-dashboard').classList.remove('hidden');renderAll();}if(p==='affiliate')checkAffSession();}
 function openAffiliateArea(){showPage('affiliate');}
 function openAdminArea(){showPage('admin');}
-function affLinkOf(code){return SITE_URL+(SITE_URL.indexOf('?')>=0?'&':'?')+'ref='+code;}
+function affLinkOf(code){return SITE_URL+(SITE_URL.includes('?')?'&':'?')+'ref='+code;}
 function bankComplete(b){return !!(b&&b.holder&&b.cpf&&b.bankName&&b.agency&&b.account);}
-function bankText(b){if(!bankComplete(b))return 'Incompleto';return b.bankName+' Ag:'+b.agency+' Cta:'+b.account+' CPF:'+b.cpf+(b.pix?' PIX:'+b.pix:'');}
-function next10(){var t=new Date();var d=new Date(t.getFullYear(),t.getMonth(),10);if(t.getDate()>10)d=new Date(t.getFullYear(),t.getMonth()+1,10);return d.toLocaleDateString('pt-BR');}
-
-/* === VÍDEO — robusto com fallback iframe em 3.5s === */
-function startVideo(){
-  var box=document.getElementById('videoBox');if(!box)return;
-  box.onclick=null;box.style.cursor='default';box.innerHTML='';
-  var v=document.createElement('video');
-  v.controls=true;v.autoplay=true;v.playsInline=true;
-  v.style.cssText='width:100%;height:100%;object-fit:contain;background:#000';
-  v.src='https://drive.google.com/uc?export=download&confirm=t&id=1zmNWNCY8ZMZHzyh3qYVF2vs6jgVvkiKR';
-  var fellBack=false;
-  function fallback(){if(fellBack)return;fellBack=true;box.innerHTML='<iframe src="https://drive.google.com/file/d/1zmNWNCY8ZMZHzyh3qYVF2vs6jgVvkiKR/preview?autoplay=1" width="100%" height="100%" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen style="border:0;width:100%;height:100%"></iframe>';}
-  v.onerror=fallback;
-  setTimeout(function(){try{if(v.readyState<2)fallback();}catch(e){fallback();}},3500);
-  box.appendChild(v);
-}
-function replayVideo(){startVideo();toast('Reproduzindo...','info');}
-
-/* === Rastrear clique de afiliado (?ref=) === */
-(function(){
-  try{
-    var p=new URLSearchParams(location.search);var ref=p.get('ref');
-    if(ref){
-      localStorage.setItem('nf_ref',ref);
-      DB.clicks[ref]=(DB.clicks[ref]||0)+1;saveDBCache();
-      sbRpc('increment_click',{aff_code:ref}).catch(function(){});
-      var a=DB.affiliates.find(function(x){return x.code.toUpperCase()===ref.toUpperCase();});
-      if(a){var b=document.createElement('div');b.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:60;background:#10B981;color:#fff;padding:8px 20px;border-radius:30px;font-size:13px;font-weight:600';b.innerHTML='Você foi indicado por <strong>'+a.name+'</strong>!';document.body.appendChild(b);setTimeout(function(){b.remove();},5000);}
-    }
-  }catch(e){}
-})();
-
-window.addEventListener('load',function(){
-  loadPublicSettings();
-  var h=location.hash.replace('#','');
-  if(h==='admin')openAdminArea();else if(h==='affiliate')openAffiliateArea();
-  loadRates();
-  if(localStorage.getItem('nf_admin')==='1'&&sessionStorage.getItem(ADMIN_PASS_KEY))refreshAdminFromServer();
-});
-
-function openLeadModal(){var ref=localStorage.getItem('nf_ref');if(ref){var a=DB.affiliates.find(function(x){return x.code.toUpperCase()===ref.toUpperCase();});if(a){document.getElementById('leadAffInfo').classList.remove('hidden');document.getElementById('leadAffName').textContent=a.name;}}document.getElementById('leadModal').classList.add('open');validateLead();}
-function validateLead(){var n=document.getElementById('leadName').value.trim();var e=document.getElementById('leadEmail').value.trim();var w=document.getElementById('leadWhats').value.trim();var d=document.getElementById('leadDoc').value.trim();var q=parseInt(document.getElementById('leadQty').value)||0;var b=document.getElementById('leadBirth').value;var ok=n&&e.indexOf('@')>=0&&w.length>=10&&d.length>=5&&q>=1&&b;var btn=document.getElementById('leadSubmit');if(ok){btn.disabled=false;btn.style.background='linear-gradient(90deg,#B8860B,#D4AF37)';btn.style.color='#000';btn.innerHTML='<i class="fa fa-arrow-right"></i> Seguir para Pagamento ('+q+'x = '+BRL(q*PRICE_BRL)+')';}else{btn.disabled=true;btn.style.background='#374151';btn.style.color='#9CA3AF';btn.innerHTML='<i class="fa fa-lock"></i> Preencha todos os campos para liberar';}}
-
-/* === SUBMIT LEAD (checkout) — sempre redireciona, mesmo se offline === */
-function submitLead(){
-  var n=document.getElementById('leadName').value.trim();
-  var e=document.getElementById('leadEmail').value.trim();
-  var w=document.getElementById('leadWhats').value.trim();
-  var d=document.getElementById('leadDoc').value.trim();
-  var q=parseInt(document.getElementById('leadQty').value)||1;
-  var b=document.getElementById('leadBirth').value;
-  if(!n||e.indexOf('@')<0||w.length<10||d.length<5||q<1||!b){toast('Preencha todos os campos obrigatórios.','error');return;}
-  var ref=localStorage.getItem('nf_ref');var affId='';
-  if(ref){var af=DB.affiliates.find(function(x){return x.code.toUpperCase()===ref.toUpperCase();});if(af)affId=af.id;}
-  var sale={id:'L'+Date.now().toString().slice(-6),date:new Date().toISOString().slice(0,10),client:n,method:'Checkout',value:q*PRICE_BRL,affiliateId:affId,status:'pendente',leadEmail:e,leadWhats:w,leadDoc:d,leadQty:q,leadBirth:b};
-  DB.sales.push(sale);saveDBCache();
-  sbFrom('sales').insert([{id:sale.id,date:sale.date,client:sale.client,method:sale.method,value:sale.value,affiliate_id:affId||null,status:sale.status,lead_email:e,lead_whats:w,lead_doc:d,lead_qty:q,lead_birth:b||null}]).catch(function(){});
-  closeModal('leadModal');
-  toast('Venda registrada! Redirecionando...','success');
-  setTimeout(function(){window.open(CHECKOUT,'_blank');},800);
-  ['leadName','leadEmail','leadWhats','leadDoc','leadBirth'].forEach(function(id){document.getElementById(id).value='';});
-  document.getElementById('leadQty').value=1;
-}
-
-/* === Câmbio e parcelamento (inalterado) === */
-var FALLBACK={USD:1,BRL:5.45,EUR:0.92,GBP:0.79,ARS:1050,MXN:19.8,CLP:940,COP:4100,PEN:3.78,CAD:1.37,AUD:1.52,JPY:156,CNY:7.25,INR:83.5,RUB:92,ZAR:18.6,CHF:0.89,AED:3.67,TRY:32.5,KRW:1370,PLN:4.0,SEK:10.6,SGD:1.35,HKD:7.8,NZD:1.66,crypto:{BTC:65000,ETH:3400,USDT:1,USDC:1,BNB:580,SOL:150,XRP:0.55,DOGE:0.13}};
-var rates={fiat:Object.assign({},FALLBACK),crypto:Object.assign({},FALLBACK.crypto),source:'fallback'};
-function loadRates(){
-  fetch('https://open.er-api.com/v6/latest/USD').then(function(r){return r.json();}).then(function(fj){if(fj&&fj.rates){rates.fiat=fj.rates;rates.source='live';updateCambio();updateCartao();updateDebitoPix();var el=document.getElementById('rateStatus');if(el)el.textContent='(taxas ao vivo)';}}).catch(function(){});
-  fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,usd-coin,binancecoin,solana,ripple,dogecoin&vs_currencies=usd').then(function(r){return r.json();}).then(function(cj){if(cj){rates.crypto={BTC:cj.bitcoin&&cj.bitcoin.usd||FALLBACK.crypto.BTC,ETH:cj.ethereum&&cj.ethereum.usd||FALLBACK.crypto.ETH,USDT:cj.tether&&cj.tether.usd||1,USDC:cj['usd-coin']&&cj['usd-coin'].usd||1,BNB:cj.binancecoin&&cj.binancecoin.usd||FALLBACK.crypto.BNB,SOL:cj.solana&&cj.solana.usd||FALLBACK.crypto.SOL,XRP:cj.ripple&&cj.ripple.usd||FALLBACK.crypto.XRP,DOGE:cj.dogecoin&&cj.dogecoin.usd||FALLBACK.crypto.DOGE};updateCambio();}}).catch(function(){});
-}
+function bankText(b){if(!bankComplete(b))return '⚠️ Incompleto';return b.bankName+' · Ag:'+b.agency+' · Cta:'+b.account+' ('+(b.type==='poupanca'?'Poupança':b.type==='pagamento'?'Pagamento':'Corrente')+') · CPF:'+b.cpf+(b.pix?' · PIX:'+b.pix:'');}
+function next10(){const t=new Date();let d=new Date(t.getFullYear(),t.getMonth(),10);if(t.getDate()>10)d=new Date(t.getFullYear(),t.getMonth()+1,10);return d.toLocaleDateString('pt-BR');}
+function startVideo(){const box=document.getElementById('videoBox');if(!box)return;box.onclick=null;box.style.cursor='default';const v=document.createElement('video');v.controls=true;v.autoplay=true;v.loop=false;v.playsInline=true;v.style.cssText='width:100%;height:100%;object-fit:contain;background:#000';v.src='https://drive.google.com/uc?export=download&confirm=t&id=1zmNWNCY8ZMZHzyh3qYVF2vs6jgVvkiKR';v.onerror=function(){box.innerHTML='<iframe src="https://drive.google.com/file/d/1zmNWNCY8ZMZHzyh3qYVF2vs6jgVvkiKR/preview?autoplay=1" width="100%" height="100%" allow="autoplay; encrypted-media; fullscreen" allowfullscreen style="border:0"></iframe>';};box.innerHTML='';box.appendChild(v);}
+function resetVideo(){const box=document.getElementById('videoBox');if(!box)return;box.onclick=null;box.style.cursor='default';
+box.innerHTML=`<div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6" style="background:linear-gradient(135deg,#050A14,#0A1629)">
+<div class="absolute inset-0 opacity-10" style="background-image:linear-gradient(rgba(212,175,55,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(212,175,55,.5) 1px,transparent 1px);background-size:44px 44px"></div>
+<div class="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-nexvon-gold"></div><div class="absolute top-3 right-3 w-8 h-8 border-t-2 border-r-2 border-nexvon-gold"></div><div class="absolute bottom-3 left-3 w-8 h-8 border-b-2 border-l-2 border-nexvon-gold"></div><div class="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-nexvon-gold"></div>
+<img src="https://www.image2url.com/r2/default/images/1792425101598-f200dc11-6183-44b0-863a-ae8db985216d.jpg" class="h-14 md:h-16 rounded-xl mb-4" style="filter:drop-shadow(0 4px 20px rgba(212,175,55,.5))">
+<div class="text-2xl md:text-3xl font-bold font-display text-white mb-2">Obrigado por assistir! ✨</div>
+<p class="text-nexvon-silver text-sm md:text-base mb-6 max-w-md">Agora é sua vez de dominar qualquer idioma — assistindo ao que você ama. Acesso vitalício, pagamento único.</p>
+<div class="flex flex-col sm:flex-row gap-3 justify-center w-full max-w-md">
+<button onclick="openLeadModal()" class="gold-gradient text-black font-bold px-5 py-3 rounded-xl text-sm md:text-base btn-premium flex-1"><i class="fa fa-fire mr-1"></i> Garantir Meu Acesso Vitalício</button>
+<button onclick="startVideo()" class="glass text-white font-bold px-5 py-3 rounded-xl text-sm md:text-base btn-premium flex-1"><i class="fa fa-rotate-right mr-1"></i> Assistir Novamente</button>
+</div>
+<a href="https://wa.me/5519997048175" target="_blank" class="mt-4 text-nexvon-whatsapp text-xs md:text-sm hover:underline"><i class="fa-brands fa-whatsapp mr-1"></i> Tirar dúvidas no WhatsApp</a>
+</div>`;
+toast('Vídeo finalizado. Garanta seu acesso!','info');}
+function replayVideo(){const box=document.getElementById('videoBox');if(!box)return;box.onclick=startVideo;box.style.cursor='pointer';startVideo();toast('Reproduzindo novamente...','info');}
+(function(){const p=new URLSearchParams(location.search);const ref=p.get('ref');if(ref){localStorage.setItem('nf_ref',ref);DB.clicks[ref]=(DB.clicks[ref]||0)+1;saveDB();const a=DB.affiliates.find(x=>x.code.toUpperCase()===ref.toUpperCase());if(a){const b=document.createElement('div');b.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:60;background:#10B981;color:#fff;padding:8px 20px;border-radius:30px;font-size:13px;font-weight:600';b.innerHTML='🎁 Você foi indicado por <strong>'+a.name+'</strong>!';document.body.appendChild(b);setTimeout(()=>b.remove(),5000);}}})();
+window.addEventListener('load',()=>{try{fetch('/api/db').then(r=>r.ok?r.json():null).then(d=>{if(d&&d.sales){DB=Object.assign(defaultDB(),d);if(DB.settings.siteUrl)SITE_URL=DB.settings.siteUrl;localStorage.setItem(DB_KEY,JSON.stringify(DB));}}).catch(()=>{});}catch(e){}const h=location.hash.replace('#','');if(h==='admin')openAdminArea();else if(h==='affiliate')openAffiliateArea();loadRates();});
+function openLeadModal(){const ref=localStorage.getItem('nf_ref');if(ref){const a=DB.affiliates.find(x=>x.code.toUpperCase()===ref.toUpperCase());if(a){document.getElementById('leadAffInfo').classList.remove('hidden');document.getElementById('leadAffName').textContent=a.name;}}document.getElementById('leadModal').classList.add('open');validateLead();}
+function validateLead(){const n=document.getElementById('leadName').value.trim();const e=document.getElementById('leadEmail').value.trim();const w=document.getElementById('leadWhats').value.trim();const d=document.getElementById('leadDoc').value.trim();const q=parseInt(document.getElementById('leadQty').value)||0;const b=document.getElementById('leadBirth').value;const ok=n&&e.includes('@')&&w.length>=10&&d.length>=5&&q>=1&&b;const btn=document.getElementById('leadSubmit');if(ok){btn.disabled=false;btn.style.background='linear-gradient(90deg,#B8860B,#D4AF37)';btn.style.color='#000';btn.innerHTML='<i class="fa fa-arrow-right"></i> Seguir para Pagamento ('+q+'x = '+BRL(q*PRICE_BRL)+')';}else{btn.disabled=true;btn.style.background='#374151';btn.style.color='#9CA3AF';btn.innerHTML='<i class="fa fa-lock"></i> Preencha todos os campos para liberar';}}
+function submitLead(){const n=document.getElementById('leadName').value.trim();const e=document.getElementById('leadEmail').value.trim();const w=document.getElementById('leadWhats').value.trim();const d=document.getElementById('leadDoc').value.trim();const q=parseInt(document.getElementById('leadQty').value)||1;const b=document.getElementById('leadBirth').value;if(!n||!e.includes('@')||w.length<10||d.length<5||q<1||!b){toast('Preencha todos os campos obrigatórios.','error');return;}const ref=localStorage.getItem('nf_ref');let affId='';if(ref){const a=DB.affiliates.find(x=>x.code.toUpperCase()===ref.toUpperCase());if(a)affId=a.id;}const sale={id:'L'+Date.now().toString().slice(-6),date:new Date().toISOString().slice(0,10),client:n,method:'Checkout — aguardando confirmação',value:q*PRICE_BRL,affiliateId:affId,status:'pendente',leadEmail:e,leadWhats:w,leadDoc:d,leadQty:q,leadBirth:b};DB.sales.push(sale);saveDB();closeModal('leadModal');toast('Venda registrada! Redirecionando ao pagamento...','success');setTimeout(()=>window.open(CHECKOUT,'_blank'),800);['leadName','leadEmail','leadWhats','leadDoc','leadBirth'].forEach(id=>document.getElementById(id).value='');document.getElementById('leadQty').value=1;}
+const FALLBACK={USD:1,BRL:5.45,EUR:0.92,GBP:0.79,ARS:1050,MXN:19.8,CLP:940,COP:4100,PEN:3.78,CAD:1.37,AUD:1.52,JPY:156,CNY:7.25,INR:83.5,RUB:92,ZAR:18.6,CHF:0.89,AED:3.67,TRY:32.5,KRW:1370,PLN:4.0,SEK:10.6,SGD:1.35,HKD:7.8,NZD:1.66,crypto:{BTC:65000,ETH:3400,USDT:1,USDC:1,BNB:580,SOL:150,XRP:0.55,DOGE:0.13}};
+let rates={fiat:{...FALLBACK},crypto:{...FALLBACK.crypto},source:'fallback'};
+async function loadRates(){try{const f=await fetch('https://open.er-api.com/v6/latest/USD');const fj=await f.json();if(fj&&fj.rates){rates.fiat=fj.rates;rates.source='live';}}catch(e){}try{const c=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,usd-coin,binancecoin,solana,ripple,dogecoin&vs_currencies=usd');const cj=await c.json();if(cj){rates.crypto={BTC:cj.bitcoin?.usd||FALLBACK.crypto.BTC,ETH:cj.ethereum?.usd||FALLBACK.crypto.ETH,USDT:cj.tether?.usd||1,USDC:cj['usd-coin']?.usd||1,BNB:cj.binancecoin?.usd||FALLBACK.crypto.BNB,SOL:cj.solana?.usd||FALLBACK.crypto.SOL,XRP:cj.ripple?.usd||FALLBACK.crypto.XRP,DOGE:cj.dogecoin?.usd||FALLBACK.crypto.DOGE};}}catch(e){}const el=document.getElementById('rateStatus');if(el)el.textContent=rates.source==='live'?'(taxas ao vivo)':'(taxas de referência)';updateCambio();updateCartao();updateDebitoPix();}
 function getRate(cur){if(rates.crypto[cur]!==undefined)return 1/rates.crypto[cur];return rates.fiat[cur]||1;}
-function updateCambio(){var sel=document.getElementById('currencySelect').value;var rate=getRate(sel);var val=BASE_USD*rate;var isCrypto=rates.crypto[sel]!==undefined;var valText,rateText;if(isCrypto){valText=val.toFixed(6)+' '+sel;rateText='1 '+sel+' = $'+rates.crypto[sel].toLocaleString('en-US',{maximumFractionDigits:2})+' USD';}else{try{valText=new Intl.NumberFormat('pt-BR',{style:'currency',currency:sel}).format(val);}catch(e){valText=val.toFixed(2)+' '+sel;}rateText='1 USD = '+rate.toLocaleString('pt-BR',{maximumFractionDigits:4})+' '+sel;}document.getElementById('convertedValue').textContent=valText;document.getElementById('convertedRate').textContent=rateText;}
+function updateCambio(){const sel=document.getElementById('currencySelect').value;const rate=getRate(sel);const val=BASE_USD*rate;const isCrypto=rates.crypto[sel]!==undefined;let valText,rateText;if(isCrypto){valText=val.toFixed(6)+' '+sel;rateText='Cotação: 1 '+sel+' = $'+rates.crypto[sel].toLocaleString('en-US',{maximumFractionDigits:2})+' USD';}else{try{valText=new Intl.NumberFormat('pt-BR',{style:'currency',currency:sel}).format(val);}catch(e){valText=val.toFixed(2)+' '+sel;}rateText='Cotação: 1 USD = '+rate.toLocaleString('pt-BR',{maximumFractionDigits:4})+' '+sel;}document.getElementById('convertedValue').textContent=valText;document.getElementById('convertedRate').textContent=rateText;}
 function infiniteRate(n){if(n<=6)return 0;if(n<=9)return 0.0199;if(n<=12)return 0.0249;if(n<=15)return 0.0299;return 0.0349;}
 function priceParcela(pv,i,n){if(i===0)return pv/n;return pv*i/(1-Math.pow(1+i,-n));}
-function updateCartao(){var usdbrl=rates.fiat.BRL||FALLBACK.BRL;var pvBrl=BASE_USD*usdbrl;var n=parseInt(document.getElementById('parcelasRange').value);var i=infiniteRate(n);var parcela=priceParcela(pvBrl,i,n);var total=parcela*n;var juros=total-pvBrl;document.getElementById('parcelasLabel').textContent=n;document.getElementById('cardUsdBrl').textContent='R$ '+usdbrl.toFixed(4).replace('.',',');document.getElementById('cardBrlValue').textContent=BRL(pvBrl);document.getElementById('parcelaValue').textContent=BRL(parcela);document.getElementById('totalValue').textContent=BRL(total);document.getElementById('jurosValue').textContent=i===0?'0% sem juros':(i*100).toFixed(2)+'% a.m.';document.getElementById('jurosValue').style.color=i===0?'#22C55E':'#F59E0B';document.getElementById('custoJuros').textContent=juros>0?'+ '+BRL(juros):'R$ 0,00';document.getElementById('parcelasObs').textContent=i===0?n+'x SEM JUROS total '+BRL(pvBrl):n+'x com taxa '+(i*100).toFixed(2)+'% a.m. juros '+BRL(juros);document.getElementById('parcelasUsdEq').textContent='1 USD = R$ '+usdbrl.toFixed(4).replace('.',',');}
-function updateDebitoPix(){var usdbrl=rates.fiat.BRL||FALLBACK.BRL;var full=BASE_USD*usdbrl;var disc=full*PIX_DISCOUNT;var fin=full-disc;var dr=document.getElementById('debitoRate');if(dr)dr.textContent='R$ '+usdbrl.toFixed(4).replace('.',',');var dv=document.getElementById('debitoValue');if(dv)dv.textContent=BRL(full);var pf=document.getElementById('pixFull');if(pf)pf.textContent=BRL(full);var pd=document.getElementById('pixDiscount');if(pd)pd.textContent='- '+BRL(disc);var pfn=document.getElementById('pixFinal');if(pfn)pfn.textContent=BRL(fin);}
-document.querySelectorAll('.pay-tab').forEach(function(btn){btn.addEventListener('click',function(){document.querySelectorAll('.pay-tab').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');document.querySelectorAll('.pay-content').forEach(function(c){c.classList.add('hidden');});document.getElementById('pay-'+btn.dataset.pay).classList.remove('hidden');});});
+function updateCartao(){const usdbrl=rates.fiat.BRL||FALLBACK.BRL;const pvBrl=BASE_USD*usdbrl;const n=parseInt(document.getElementById('parcelasRange').value);const i=infiniteRate(n);const parcela=priceParcela(pvBrl,i,n);const total=parcela*n;const juros=total-pvBrl;document.getElementById('parcelasLabel').textContent=n;document.getElementById('cardUsdBrl').textContent='R$ '+usdbrl.toFixed(4).replace('.',',');document.getElementById('cardBrlValue').textContent=BRL(pvBrl);document.getElementById('parcelaValue').textContent=BRL(parcela);document.getElementById('totalValue').textContent=BRL(total);document.getElementById('jurosValue').textContent=i===0?'0% (sem juros)':(i*100).toFixed(2)+'% a.m.';document.getElementById('jurosValue').style.color=i===0?'#22C55E':'#F59E0B';document.getElementById('custoJuros').textContent=juros>0?'+ '+BRL(juros):'R$ 0,00';document.getElementById('parcelasObs').textContent=i===0?`✅ ${n}x SEM JUROS — total ${BRL(pvBrl)}`:`📊 ${n}x com taxa InfinitePay de ${(i*100).toFixed(2)}% a.m. (Price) — juros: ${BRL(juros)}`;document.getElementById('parcelasUsdEq').textContent=`Equivalente USD: parcela ≈ $${(parcela/usdbrl).toFixed(2)} · Total ≈ $${(total/usdbrl).toFixed(2)} · 1 USD = R$ ${usdbrl.toFixed(4).replace('.',',')}`;}
+function updateDebitoPix(){const usdbrl=rates.fiat.BRL||FALLBACK.BRL;const full=BASE_USD*usdbrl;const disc=full*PIX_DISCOUNT;const fin=full-disc;const dr=document.getElementById('debitoRate');if(dr)dr.textContent='R$ '+usdbrl.toFixed(4).replace('.',',');const dv=document.getElementById('debitoValue');if(dv)dv.textContent=BRL(full);const pf=document.getElementById('pixFull');if(pf)pf.textContent=BRL(full);const pd=document.getElementById('pixDiscount');if(pd)pd.textContent='- '+BRL(disc);const pfn=document.getElementById('pixFinal');if(pfn)pfn.textContent=BRL(fin);}
+document.querySelectorAll('.pay-tab').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.pay-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.pay-content').forEach(c=>c.classList.add('hidden'));document.getElementById('pay-'+btn.dataset.pay).classList.remove('hidden');});});
 document.getElementById('currencySelect').addEventListener('change',updateCambio);
 document.getElementById('parcelasRange').addEventListener('input',updateCartao);
-
 function toggleAffForm(mode){document.getElementById('aff-login').classList.toggle('hidden',mode==='register');document.getElementById('aff-register').classList.toggle('hidden',mode==='login');}
-function checkAffSession(){var s=sessionStorage.getItem(AFF_SESS);if(s){try{showAffPanel(JSON.parse(s));}catch(e){}}else{document.getElementById('aff-login').classList.remove('hidden');document.getElementById('aff-register').classList.add('hidden');document.getElementById('aff-dashboard').classList.add('hidden');}}
-
-/* === LOGIN AFILIADO (RPC com fallback local) === */
-function affLogin(){
-  var code=document.getElementById('loginCode').value.trim().toUpperCase();
-  var pass=document.getElementById('loginPass').value;
-  if(!code||!pass){toast('Digite código e senha.','error');return;}
-  sbRpc('affiliate_login',{aff_code:code,pass:pass}).then(function(r){
-    var data=r&&r.data;var err=r&&r.error;
-    if(err&&err.message!=='offline'){toast('Erro: '+err.message,'error');return;}
-    if(!data||data.error){
-      /* Fallback: tenta no cache local */
-      var a=DB.affiliates.find(function(x){return x.code.toUpperCase()===code;});
-      if(a&&a.password===pass){
-        if(a.status==='pendente'){toast('Cadastro em análise.','info');return;}
-        a._password=pass;sessionStorage.setItem(AFF_SESS,JSON.stringify(a));toast('Bem-vindo (offline)!','success');showAffPanel(a);return;
-      }
-      if(data&&data.error==='nao_encontrado')toast('Código não encontrado.','error');
-      else if(data&&data.error==='senha_incorreta')toast('Senha incorreta.','error');
-      else toast('Falha no login.','error');
-      return;
-    }
-    if(data.status==='pendente'){toast('Cadastro em análise. Aguarde aprovação.','info');return;}
-    if(data.status==='rejeitado'){toast('Cadastro recusado.','error');return;}
-    data._password=pass;
-    sbRpc('affiliate_get_data',{aff_id:data.id,aff_pass:pass}).then(function(r2){
-      var full=r2&&r2.data;
-      if(full&&!full.error){
-        DB.sales=full.sales||[];
-        DB.clicks[full.affiliate.code]=full.clicks||0;
-        var idx=DB.affiliates.findIndex(function(x){return x.id===full.affiliate.id;});
-        if(idx>=0)DB.affiliates[idx]=full.affiliate;else DB.affiliates.push(full.affiliate);
-        if(full.siteSettings){DB.settings=Object.assign({},DB.settings,full.siteSettings);if(DB.settings.siteUrl)SITE_URL=DB.settings.siteUrl;}
-        saveDBCache();
-        data=full.affiliate;data._password=pass;
-      }
-      sessionStorage.setItem(AFF_SESS,JSON.stringify(data));
-      toast('Bem-vindo(a), '+data.name+'!','success');
-      showAffPanel(data);
-    }).catch(function(){sessionStorage.setItem(AFF_SESS,JSON.stringify(data));showAffPanel(data);});
-  }).catch(function(){toast('Erro de conexão.','error');});
-}
-
-/* === CADASTRO AFILIADO (RPC com fallback local) === */
-var _pendingRegPass='';
-function affRegister(){
-  var name=document.getElementById('regName').value.trim();
-  var whats=document.getElementById('regWhats').value.trim();
-  var email=document.getElementById('regEmail').value.trim();
-  var pass=document.getElementById('regPass').value;
-  var pass2=document.getElementById('regPass2').value;
-  if(!name||!whats||!pass){toast('Preencha nome, WhatsApp e senha.','error');return;}
-  if(pass!==pass2){toast('As senhas não coincidem.','error');return;}
-  var code=document.getElementById('regCode').value.trim().toUpperCase()||'NF'+Math.random().toString(36).slice(2,7).toUpperCase();
-  var contact='WhatsApp: '+whats+(email?' / '+email:'');
-  sbRpc('affiliate_register',{p_name:name,p_contact:contact,p_code:code,p_pass:pass}).then(function(r){
-    var data=r&&r.data;var err=r&&r.error;
-    if(err&&err.message!=='offline'){toast('Erro: '+err.message,'error');return;}
-    if(data&&data.error==='codigo_existe'){toast('Código já existe.','error');return;}
-    var newId=(data&&data.id)||('A'+Date.now());
-    _pendingRegPass=pass;
-    /* Salva localmente também (fallback) */
-    DB.affiliates.push({id:newId,name:name,contact:contact,code:code,password:pass,commission:DB.settings.defaultCommission,clicks:0,status:'pendente',bank:{},withdrawals:[]});
-    saveDBCache();
-    ['regName','regWhats','regEmail','regCode','regPass','regPass2'].forEach(function(id){document.getElementById(id).value='';});
-    toggleAffForm('login');document.getElementById('loginCode').value=code;
-    toast('Cadastro enviado! Envie os documentos KYC.','success');
-    setTimeout(function(){openKycUpload(newId,pass);},600);
-  }).catch(function(){toast('Erro de conexão.','error');});
-}
-
-var _kycAffId=null;var _kycAffPass=null;
-function resizeImg(file,maxW,cb){var r=new FileReader();r.onload=function(e){var img=new Image();img.onload=function(){var c=document.createElement('canvas');var w=img.width,h=img.height;if(w>maxW){h=h*maxW/w;w=maxW;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',0.7));};img.src=e.target.result;};r.readAsDataURL(file);}
-function openKycUpload(id,pass){_kycAffId=id;_kycAffPass=pass||_pendingRegPass;document.getElementById('kycTitle').innerHTML='<i class="fa fa-id-card mr-2"></i> Verificação KYC';document.getElementById('kycBody').innerHTML='<p class="text-sm text-nexvon-silver mb-4">Envie: <strong>1 selfie com documento</strong> e <strong>uma foto do documento</strong>.</p><div class="space-y-4"><div><label class="block text-sm font-semibold mb-1 text-gold">Selfie com documento</label><input type="file" id="kycSelfie" accept="image/*" capture="user"></div><div><label class="block text-sm font-semibold mb-1 text-gold">Foto do documento</label><input type="file" id="kycDoc" accept="image/*"></div><button onclick="saveKyc()" class="w-full btn btn-gold justify-center py-3 btn-premium">Enviar KYC</button></div>';document.getElementById('kycModal').classList.add('open');}
-function saveKyc(){
-  var sf=document.getElementById('kycSelfie').files[0];var df=document.getElementById('kycDoc').files[0];
-  if(!sf||!df){toast('Envie as duas fotos.','error');return;}
-  toast('Processando...','info');
-  var done=0;var kyc={};
-  function finish(){done++;if(done===2){kyc.status='pendente';kyc.date=new Date().toISOString();
-    var a=DB.affiliates.find(function(x){return x.id===_kycAffId;});if(a){a.kyc=kyc;saveDBCache();}
-    if(_kycAffPass)sbRpc('affiliate_update',{aff_id:_kycAffId,aff_pass:_kycAffPass,payload:{kyc:kyc}}).catch(function(){});
-    closeModal('kycModal');toast('KYC enviado!','success');}}
-  resizeImg(sf,800,function(d){kyc.selfie=d;finish();});
-  resizeImg(df,800,function(d){kyc.doc=d;finish();});
-}
-function openKycView(id){var a=DB.affiliates.find(function(x){return x.id===id;});if(!a)return;document.getElementById('kycTitle').innerHTML='KYC — '+a.name;var k=a.kyc;if(!k||!k.selfie){document.getElementById('kycBody').innerHTML='<p class="text-center text-gray-400 py-8">KYC não enviado.</p>';}else{document.getElementById('kycBody').innerHTML='<div class="space-y-4"><div class="bg-black/30 rounded-xl p-3 text-center"><img src="'+k.selfie+'" style="max-width:100%;max-height:300px;border-radius:8px"></div><div class="bg-black/30 rounded-xl p-3 text-center"><img src="'+k.doc+'" style="max-width:100%;max-height:300px;border-radius:8px"></div><div class="text-center text-xs text-gray-400">Status: <strong>'+(k.status||'pendente')+'</strong></div><div class="flex gap-2 justify-center">'+(k.status==='aprovado'?'<button onclick="kycStatus(\''+id+'\',\'pendente\')" class="btn btn-ghost">Desfazer</button>':'<button onclick="kycStatus(\''+id+'\',\'aprovado\')" class="btn btn-gold">Aprovar KYC</button>')+'</div></div>';}document.getElementById('kycModal').classList.add('open');}
-function kycStatus(id,st){var a=DB.affiliates.find(function(x){return x.id===id;});if(!a)return;a.kyc=a.kyc||{};a.kyc.status=st;saveDB();openKycView(id);toast('KYC '+st+'!','success');}
+function checkAffSession(){const s=sessionStorage.getItem(AFF_SESS);if(s){showAffPanel(JSON.parse(s));}else{document.getElementById('aff-login').classList.remove('hidden');document.getElementById('aff-register').classList.add('hidden');document.getElementById('aff-dashboard').classList.add('hidden');}}
+function affLogin(){const code=document.getElementById('loginCode').value.trim().toUpperCase();const pass=document.getElementById('loginPass').value;if(!code||!pass){toast('Digite código e senha.','error');return;}const a=DB.affiliates.find(x=>x.code.toUpperCase()===code);if(!a){toast('Código não encontrado. Cadastre-se!','error');return;}if(a.status==='pendente'){toast('Cadastro em análise. Aguarde aprovação.','info');return;}if(a.status==='rejeitado'){toast('Cadastro recusado.','error');return;}if(a.password!==pass){toast('Senha incorreta.','error');return;}sessionStorage.setItem(AFF_SESS,JSON.stringify(a));toast('Bem-vindo(a), '+a.name+'!','success');showAffPanel(a);}
+function affRegister(){const name=document.getElementById('regName').value.trim();const whats=document.getElementById('regWhats').value.trim();const pass=document.getElementById('regPass').value;const pass2=document.getElementById('regPass2').value;if(!name||!whats||!pass){toast('Preencha nome, WhatsApp e senha.','error');return;}if(pass!==pass2){toast('As senhas não coincidem.','error');return;}let code=document.getElementById('regCode').value.trim().toUpperCase()||'NF'+Math.random().toString(36).slice(2,7).toUpperCase();if(DB.affiliates.find(x=>x.code.toUpperCase()===code)){toast('Código já existe. Escolha outro.','error');return;}DB.affiliates.push({id:'A'+Date.now(),name,contact:'WhatsApp: '+whats+(document.getElementById('regEmail').value?' / '+document.getElementById('regEmail').value:''),code,password:pass,commission:DB.settings.defaultCommission,clicks:0,status:'pendente',createdAt:new Date().toISOString(),bank:{},withdrawals:[]});saveDB();const newId=DB.affiliates[DB.affiliates.length-1].id;['regName','regWhats','regEmail','regCode','regPass','regPass2'].forEach(id=>document.getElementById(id).value='');toggleAffForm('login');document.getElementById('loginCode').value=code;toast('Cadastro enviado! Agora envie seus documentos KYC.','success');setTimeout(()=>openKycUpload(newId),600);}
+let _kycAffId=null;
+function resizeImg(file,maxW,cb){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>maxW){h=h*maxW/w;w=maxW;}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',0.7));};img.src=e.target.result;};r.readAsDataURL(file);}
+function openKycUpload(id){_kycAffId=id;document.getElementById('kycTitle').innerHTML='<i class="fa fa-id-card mr-2"></i> Verificação KYC — Envie seus documentos';document.getElementById('kycBody').innerHTML='<p class="text-sm text-nexvon-silver mb-4">Para sua segurança e liberação dos saques, envie: <strong>1 selfie segurando o documento</strong> e <strong>uma foto do documento</strong> (RG, CNH ou CNPJ). Após o envio, aguarde a aprovação do admin.</p><div class="space-y-4"><div><label class="block text-sm font-semibold mb-1 text-gold">📸 Selfie com documento</label><input type="file" id="kycSelfie" accept="image/*" capture="user"><p class="text-[10px] text-gray-500 mt-1">Use a câmera. Rosto visível + documento na mão.</p></div><div><label class="block text-sm font-semibold mb-1 text-gold">🪪 Foto do documento (RG/CNH/CNPJ)</label><input type="file" id="kycDoc" accept="image/*"><p class="text-[10px] text-gray-500 mt-1">Foto nítida, sem reflexos.</p></div><button onclick="saveKyc()" class="w-full btn btn-gold justify-center py-3 btn-premium"><i class="fa fa-paper-plane"></i> Enviar Documentos KYC</button><p class="text-[10px] text-gray-500 text-center">Dados usados apenas para verificação de identidade.</p></div>';document.getElementById('kycModal').classList.add('open');}
+function saveKyc(){const sf=document.getElementById('kycSelfie').files[0];const df=document.getElementById('kycDoc').files[0];if(!sf||!df){toast('Envie a selfie E a foto do documento.','error');return;}const a=DB.affiliates.find(x=>x.id===_kycAffId);if(!a)return;toast('Processando imagens...','info');let done=0;const finish=()=>{done++;if(done===2){a.kyc=a.kyc||{};a.kyc.status='pendente';a.kyc.date=new Date().toISOString();saveDB();closeModal('kycModal');toast('KYC enviado! Aguarde aprovação.','success');}};resizeImg(sf,800,d=>{a.kyc=a.kyc||{};a.kyc.selfie=d;finish();});resizeImg(df,800,d=>{a.kyc=a.kyc||{};a.kyc.doc=d;finish();});}
+function openKycView(id){const a=DB.affiliates.find(x=>x.id===id);if(!a)return;document.getElementById('kycTitle').innerHTML='<i class="fa fa-id-card mr-2"></i> KYC — '+a.name;const k=a.kyc;if(!k||!k.selfie){document.getElementById('kycBody').innerHTML='<p class="text-center text-gray-400 py-8">KYC não enviado por este afiliado.</p>';}else{document.getElementById('kycBody').innerHTML='<div class="space-y-4"><div class="bg-black/30 rounded-xl p-3 text-center"><div class="text-xs text-gray-400 mb-2">📸 Selfie com documento</div><img src="'+k.selfie+'" style="max-width:100%;max-height:300px;border-radius:8px"></div><div class="bg-black/30 rounded-xl p-3 text-center"><div class="text-xs text-gray-400 mb-2">🪪 Documento</div><img src="'+k.doc+'" style="max-width:100%;max-height:300px;border-radius:8px"></div><div class="text-center text-xs text-gray-400">Enviado em: '+(k.date||'').slice(0,10)+' · Status: <strong class="'+(k.status==='aprovado'?'text-green-400':'text-yellow-400')+'">'+(k.status||'pendente')+'</strong></div><div class="flex gap-2 justify-center">'+(k.status==='aprovado'?'<button onclick="kycStatus(\''+id+'\',\'pendente\')" class="btn btn-ghost">Desfazer Aprovação</button>':'<button onclick="kycStatus(\''+id+'\',\'aprovado\')" class="btn btn-gold btn-premium"><i class="fa fa-check"></i> Aprovar KYC</button>')+'</div></div>';}document.getElementById('kycModal').classList.add('open');}
+function kycStatus(id,st){const a=DB.affiliates.find(x=>x.id===id);if(!a)return;a.kyc=a.kyc||{};a.kyc.status=st;saveDB();openKycView(id);renderAll();toast('KYC '+st+'!','success');}
 function affLogout(){sessionStorage.removeItem(AFF_SESS);location.reload();}
-function currentAff(){try{return JSON.parse(sessionStorage.getItem(AFF_SESS)||'null');}catch(e){return null;}}
-
-function showAffPanel(a){
-  document.getElementById('aff-login').classList.add('hidden');
-  document.getElementById('aff-register').classList.add('hidden');
-  document.getElementById('aff-dashboard').classList.remove('hidden');
-  var rate=a.commission||DB.settings.defaultCommission;
-  var sales=DB.sales.filter(function(s){return s.affiliateId===a.id&&s.status==='pago';});
-  var gen=sales.reduce(function(t,s){return t+s.value;},0);
-  var earned=gen*rate/100;
-  var withdrawn=(a.withdrawals||[]).reduce(function(t,w){return t+w.amount;},0);
-  document.getElementById('affName').textContent=a.name;
-  document.getElementById('affCodeShow').textContent='Código: '+a.code;
-  document.getElementById('affClicks').textContent=DB.clicks[a.code]||0;
-  document.getElementById('affSales').textContent=sales.length;
-  document.getElementById('affEarned').textContent=BRL(earned);
-  document.getElementById('affAvailable').textContent=BRL(earned-withdrawn);
-  document.getElementById('affRate').textContent=rate;
-  document.getElementById('affLink').value=affLinkOf(a.code);
-  var paid=DB.paidCommissions[a.id];
-  document.getElementById('affPayStatus').innerHTML=paid?'<span class="badge bg-green-500/20 text-green-400">Pago</span>':'<span class="badge bg-yellow-500/20 text-yellow-400">Pendente</span>';
-  var b=a.bank||{};
-  document.getElementById('bankHolder').value=b.holder||'';document.getElementById('bankCPF').value=b.cpf||'';document.getElementById('bankName').value=b.bankName||'';document.getElementById('bankAgency').value=b.agency||'';document.getElementById('bankAccount').value=b.account||'';document.getElementById('bankType').value=b.type||'corrente';document.getElementById('bankPix').value=b.pix||'';
-  var wb=document.getElementById('withdrawBtn');
-  if(bankComplete(b)){wb.className='btn btn-gold btn-premium';wb.innerHTML='<i class="fa fa-money-bill-wave"></i> Solicitar Saque';}
-  else{wb.className='btn btn-danger';wb.innerHTML='<i class="fa fa-lock"></i> Cadastre dados bancários';}
-  renderAffSales();renderAffWithdrawals();setupAffTabs();startAffPolling();
-}
-function startAffPolling(){
-  if(window._affInt)clearInterval(window._affInt);
-  window._affInt=setInterval(function(){
-    try{
-      var a=currentAff();if(!a||!a._password)return;
-      sbRpc('affiliate_get_data',{aff_id:a.id,aff_pass:a._password}).then(function(r){
-        var d=r&&r.data;if(!d||d.error)return;
-        DB.sales=d.sales||[];DB.clicks[d.affiliate.code]=d.clicks||0;
-        var idx=DB.affiliates.findIndex(function(x){return x.id===d.affiliate.id;});
-        if(idx>=0)DB.affiliates[idx]=d.affiliate;else DB.affiliates.push(d.affiliate);
-        var f=d.affiliate;f._password=a._password;sessionStorage.setItem(AFF_SESS,JSON.stringify(f));
-        if(document.getElementById('aff-dashboard').classList.contains('hidden'))return;
-        var rate=f.commission||DB.settings.defaultCommission;
-        var sl=DB.sales.filter(function(s){return s.affiliateId===f.id&&s.status==='pago';});
-        var gen=sl.reduce(function(t,s){return t+s.value;},0);
-        var wd=(f.withdrawals||[]).reduce(function(t,w){return t+w.amount;},0);
-        document.getElementById('affClicks').textContent=DB.clicks[f.code]||0;
-        document.getElementById('affSales').textContent=sl.length;
-        document.getElementById('affEarned').textContent=BRL(gen*rate/100);
-        document.getElementById('affAvailable').textContent=BRL(gen*rate/100-wd);
-      }).catch(function(){});
-    }catch(e){}
-  },5000);
-}
-function setupAffTabs(){document.querySelectorAll('.aff-tab').forEach(function(t){t.onclick=function(){document.querySelectorAll('.aff-tab').forEach(function(x){x.classList.remove('active');});t.classList.add('active');document.querySelectorAll('.aff-tab-content').forEach(function(c){c.classList.add('hidden');});document.getElementById('afftab-'+t.dataset.afftab).classList.remove('hidden');};});}
-function renderAffSales(){var a=currentAff();if(!a)return;var q=(document.getElementById('affSearch')?document.getElementById('affSearch').value:'').toLowerCase();var st=document.getElementById('affFilterStatus')?document.getElementById('affFilterStatus').value:'';var sales=DB.sales.filter(function(s){return s.affiliateId===a.id;});if(st)sales=sales.filter(function(s){return s.status===st;});if(q)sales=sales.filter(function(s){return s.client.toLowerCase().indexOf(q)>=0;});var rate=a.commission||DB.settings.defaultCommission;document.getElementById('affSalesTable').innerHTML=sales.map(function(s){var stc=s.status==='pago'?'bg-green-500/20 text-green-400':s.status==='pendente'?'bg-yellow-500/20 text-yellow-400':'bg-red-500/20 text-red-400';return '<tr><td>'+s.date+'</td><td>'+s.client+'</td><td>'+s.method+'</td><td>'+BRL(s.value)+'</td><td class="text-nexvon-warning">'+BRL(s.value*rate/100)+'</td><td><span class="badge '+stc+'">'+s.status+'</span></td></tr>';}).join('')||'<tr><td colspan="6" class="text-center text-gray-500 py-6">Nenhuma venda.</td></tr>';}
-function renderAffWithdrawals(){var a=currentAff();if(!a)return;var wd=a.withdrawals||[];document.getElementById('affWithdrawTable').innerHTML=wd.length?wd.map(function(w){return '<tr><td>'+w.date+'</td><td class="font-bold text-gold">'+BRL(w.amount)+'</td><td><span class="badge bg-blue-500/20 text-blue-400">Solicitado</span></td><td>dia 10 ('+w.payDate+')</td></tr>';}).join(''):'<tr><td colspan="4" class="text-center text-gray-500 py-6">Nenhum saque.</td></tr>';}
-function copyAffLink(){var el=document.getElementById('affLink');el.select();navigator.clipboard.writeText(el.value);toast('Link copiado!','success');}
-function shareAffLink(){var a=currentAff();if(!a)return;var link=affLinkOf(a.code);var text=encodeURIComponent('NEXVON FLUENCY - Acesse: '+link);window.open('https://wa.me/?text='+text,'_blank');}
-
-function saveBankProfile(){
-  var a=currentAff();if(!a)return;
-  var holder=document.getElementById('bankHolder').value.trim();var cpf=document.getElementById('bankCPF').value.trim();var bankName=document.getElementById('bankName').value.trim();var agency=document.getElementById('bankAgency').value.trim();var account=document.getElementById('bankAccount').value.trim();
-  if(!holder||!cpf||!bankName||!agency||!account){toast('Preencha todos os campos obrigatórios.','error');return;}
-  var idx=DB.affiliates.findIndex(function(x){return x.id===a.id;});
-  var bank={holder:holder,cpf:cpf,bankName:bankName,agency:agency,account:account,type:document.getElementById('bankType').value,pix:document.getElementById('bankPix').value.trim()};
-  DB.affiliates[idx].bank=bank;
-  var updated=Object.assign({},DB.affiliates[idx],{_password:a._password});
-  sessionStorage.setItem(AFF_SESS,JSON.stringify(updated));
-  saveDBCache();
-  if(a._password)sbRpc('affiliate_update',{aff_id:a.id,aff_pass:a._password,payload:{bank:bank}}).catch(function(){});
-  toast('Dados bancários salvos!','success');
-  var wb=document.getElementById('withdrawBtn');wb.className='btn btn-gold btn-premium';wb.innerHTML='<i class="fa fa-money-bill-wave"></i> Solicitar Saque';
-}
-function changeAffPass(){
-  var a=currentAff();if(!a)return;
-  var p1=document.getElementById('affNewPass').value,p2=document.getElementById('affNewPass2').value;
-  if(!p1||p1!==p2){toast('As senhas não coincidem.','error');return;}
-  sbRpc('affiliate_update',{aff_id:a.id,aff_pass:a._password,payload:{new_password:p1}}).then(function(){
-    var updated=Object.assign({},currentAff(),{_password:p1});
-    sessionStorage.setItem(AFF_SESS,JSON.stringify(updated));
-    document.getElementById('affNewPass').value='';document.getElementById('affNewPass2').value='';
-    toast('Senha alterada!','success');
-  }).catch(function(){toast('Erro de conexão.','error');});
-}
-function requestWithdraw(){var a=currentAff();if(!a)return;var b=a.bank||{};if(!bankComplete(b)){toast('Cadastro bancário incompleto!','error');document.querySelector('[data-afftab="perfil"]').click();return;}var rate=a.commission||DB.settings.defaultCommission;var sales=DB.sales.filter(function(s){return s.affiliateId===a.id&&s.status==='pago';});var earned=sales.reduce(function(t,s){return t+s.value;},0)*rate/100;var withdrawn=(a.withdrawals||[]).reduce(function(t,w){return t+w.amount;},0);var available=earned-withdrawn;if(available<=0){toast('Nenhum valor disponível.','info');return;}document.getElementById('withdrawAmount').textContent=BRL(available);document.getElementById('withdrawModal').classList.add('open');}
-function confirmWithdraw(){
-  var a=currentAff();if(!a)return;
-  var idx=DB.affiliates.findIndex(function(x){return x.id===a.id;});
-  var rate=a.commission||DB.settings.defaultCommission;
-  var sales=DB.sales.filter(function(s){return s.affiliateId===a.id&&s.status==='pago';});
-  var earned=sales.reduce(function(t,s){return t+s.value;},0)*rate/100;
-  var withdrawn=(DB.affiliates[idx].withdrawals||[]).reduce(function(t,w){return t+w.amount;},0);
-  var amount=earned-withdrawn;
-  if(!DB.affiliates[idx].withdrawals)DB.affiliates[idx].withdrawals=[];
-  DB.affiliates[idx].withdrawals.push({id:'S'+Date.now(),amount:amount,date:new Date().toLocaleDateString('pt-BR'),payDate:next10(),status:'solicitado'});
-  var updated=Object.assign({},DB.affiliates[idx],{_password:a._password});
-  sessionStorage.setItem(AFF_SESS,JSON.stringify(updated));
-  saveDBCache();
-  if(a._password)sbRpc('affiliate_update',{aff_id:a.id,aff_pass:a._password,payload:{withdrawals:DB.affiliates[idx].withdrawals}}).catch(function(){});
-  closeModal('withdrawModal');
-  alert('Saque de '+BRL(amount)+' solicitado! Próximo dia 10: '+next10());
-  showAffPanel(DB.affiliates[idx]);
-  document.querySelector('[data-afftab="saques"]').click();
-}
-
-/* === LOGIN ADMIN (RPC com fallback local) === */
-function adminLogin(){
-  var pass=document.getElementById('adminPassInput').value;
-  sbRpc('admin_login',{pass:pass}).then(function(r){
-    var data=r&&r.data;var err=r&&r.error;
-    if(err&&err.message!=='offline'){toast('Erro: '+err.message,'error');return;}
-    if(data!=='ok'){
-      /* Fallback local */
-      if(pass==='admin123'||pass===localStorage.getItem('nf_admin_pass_local')){
-        sessionStorage.setItem(ADMIN_PASS_KEY,pass);localStorage.setItem('nf_admin','1');
-        document.getElementById('admin-login').classList.add('hidden');
-        document.getElementById('admin-dashboard').classList.remove('hidden');
-        document.getElementById('setSiteUrl').value=DB.settings.siteUrl||SITE_URL;
-        document.getElementById('defComm').value=DB.settings.defaultCommission||20;
-        toast('Acesso liberado (offline)!','success');renderAll();setupAdminTabs();return;
-      }
-      toast('Senha incorreta','error');return;
-    }
-    sessionStorage.setItem(ADMIN_PASS_KEY,pass);
-    localStorage.setItem('nf_admin','1');
-    refreshAdminFromServer().then(function(){
-      document.getElementById('admin-login').classList.add('hidden');
-      document.getElementById('admin-dashboard').classList.remove('hidden');
-      document.getElementById('setSiteUrl').value=DB.settings.siteUrl||SITE_URL;
-      document.getElementById('defComm').value=DB.settings.defaultCommission||20;
-      toast('Acesso liberado!','success');renderAll();setupAdminTabs();startAdminPolling();
-    }).catch(function(){
-      document.getElementById('admin-login').classList.add('hidden');
-      document.getElementById('admin-dashboard').classList.remove('hidden');
-      renderAll();setupAdminTabs();
-    });
-  }).catch(function(){toast('Erro de conexão.','error');});
-}
-function refreshAdminFromServer(){
-  var pass=sessionStorage.getItem(ADMIN_PASS_KEY);if(!pass)return Promise.resolve();
-  return sbRpc('admin_get_all',{admin_pass:pass}).then(function(r){
-    if(r&&r.data&&!r.data.error)applyServerData(r.data);
-  }).catch(function(){});
-}
-function startAdminPolling(){
-  if(window._adminInt)clearInterval(window._adminInt);
-  window._adminInt=setInterval(function(){
-    refreshAdminFromServer().then(function(){if(!document.getElementById('admin-dashboard').classList.contains('hidden'))renderAll();}).catch(function(){});
-  },10000);
-}
-function adminLogout(){localStorage.removeItem('nf_admin');sessionStorage.removeItem(ADMIN_PASS_KEY);location.reload();}
-function setupAdminTabs(){document.querySelectorAll('.admin-tab').forEach(function(t){t.onclick=function(){document.querySelectorAll('.admin-tab').forEach(function(x){x.classList.remove('active');});t.classList.add('active');document.querySelectorAll('.adm-content').forEach(function(c){c.classList.add('hidden');});document.getElementById('adm-'+t.dataset.tab).classList.remove('hidden');renderAll();};});}
-function renderAll(){renderDashboard();renderSales();renderAffCards();renderComm();var fa=document.getElementById('fltAff');if(fa)fa.innerHTML='<option value="">Todos afiliados</option>'+DB.affiliates.map(function(a){return '<option value="'+a.id+'">'+a.name+'</option>';}).join('');}
-function renderDashboard(){var sales=DB.sales.filter(function(s){return s.status==='pago';});var rev=0,comm=0;sales.forEach(function(s){rev+=s.value;if(s.affiliateId){var a=DB.affiliates.find(function(x){return x.id===s.affiliateId;});var r=a?(a.commission||DB.settings.defaultCommission):DB.settings.defaultCommission;comm+=s.value*r/100;}});document.getElementById('stSales').textContent=DB.sales.length;document.getElementById('stRevenue').textContent=BRL(rev);document.getElementById('stComm').textContent=BRL(comm);document.getElementById('stAff').textContent=DB.affiliates.filter(function(a){return a.status==='aprovado'||!a.status;}).length;document.getElementById('latestSales').innerHTML=DB.sales.slice(-5).reverse().map(function(s){var stc=s.status==='pago'?'bg-green-500/20 text-green-400':'bg-yellow-500/20 text-yellow-400';return '<div class="flex justify-between p-2 border-b border-white/5"><span>'+s.client+'</span><span class="text-gold font-semibold">'+BRL(s.value)+'</span><span class="badge '+stc+'">'+s.status+'</span></div>';}).join('')||'<p class="text-gray-500">Nenhuma venda.</p>';}
-function renderSales(){var q=(document.getElementById('fltSearch')?document.getElementById('fltSearch').value:'').toLowerCase();var st=document.getElementById('fltStatus')?document.getElementById('fltStatus').value:'';var mt=document.getElementById('fltMethod')?document.getElementById('fltMethod').value:'';var af=document.getElementById('fltAff')?document.getElementById('fltAff').value:'';var sales=DB.sales.slice();if(q)sales=sales.filter(function(s){return s.client.toLowerCase().indexOf(q)>=0;});if(st)sales=sales.filter(function(s){return s.status===st;});if(mt)sales=sales.filter(function(s){return s.method===mt;});if(af)sales=sales.filter(function(s){return s.affiliateId===af;});document.getElementById('salesTable').innerHTML=sales.map(function(s){var a=DB.affiliates.find(function(x){return x.id===s.affiliateId;});var r=a?(a.commission||DB.settings.defaultCommission):0;var stc=s.status==='pago'?'bg-green-500/20 text-green-400':s.status==='pendente'?'bg-yellow-500/20 text-yellow-400':'bg-red-500/20 text-red-400';var lead=s.leadEmail?'<div class="text-[10px] text-gray-500">'+s.leadEmail+' '+s.leadWhats+'</div>':'';return '<tr><td class="font-mono text-xs">'+s.id+'</td><td>'+s.date+'</td><td class="font-semibold">'+s.client+lead+'</td><td>'+s.method+'</td><td class="font-semibold">'+BRL(s.value)+'</td><td>'+(a?a.name:'—')+'</td><td class="text-nexvon-warning">'+(a?BRL(s.value*r/100):'—')+'</td><td><span class="badge '+stc+'">'+s.status+'</span></td><td><div class="flex gap-1"><button class="btn btn-ghost text-xs" onclick="editSale(\''+s.id+'\')"><i class="fa fa-edit"></i></button><button class="btn btn-danger text-xs" onclick="delSale(\''+s.id+'\')"><i class="fa fa-trash"></i></button></div></td></tr>';}).join('')||'<tr><td colspan="9" class="text-center text-gray-500 py-6">Nenhuma venda.</td></tr>';}
-function editSale(id){var s=DB.sales.find(function(x){return x.id===id;});if(!s)return;document.getElementById('saleModalTitle').textContent='Editar Venda';document.getElementById('saleId').value=s.id;document.getElementById('saleClient').value=s.client;document.getElementById('saleValue').value=s.value;document.getElementById('saleMethod').value=s.method;document.getElementById('saleStatus').value=s.status;document.getElementById('saleAff').innerHTML='<option value="">— Sem afiliado —</option>'+DB.affiliates.map(function(a){return '<option value="'+a.id+'"'+(s.affiliateId===a.id?' selected':'')+'>'+a.name+'</option>';}).join('');document.getElementById('saleModal').classList.add('open');}
-function saveSale(){var id=document.getElementById('saleId').value;var data={id:id||'V'+Date.now().toString().slice(-6),date:new Date().toISOString().slice(0,10),client:document.getElementById('saleClient').value||'Cliente',method:document.getElementById('saleMethod').value,value:parseFloat(document.getElementById('saleValue').value)||0,affiliateId:document.getElementById('saleAff').value,status:document.getElementById('saleStatus').value};if(id){var i=DB.sales.findIndex(function(x){return x.id===id;});DB.sales[i]=Object.assign({},DB.sales[i],data);}else DB.sales.push(data);saveDB();closeModal('saleModal');renderAll();toast('Venda salva!','success');}
-function delSale(id){if(confirm('Excluir esta venda?')){DB.sales=DB.sales.filter(function(s){return s.id!==id;});saveDB();renderAll();}}
-function renderAffCards(){var q=(document.getElementById('fltAffSearch')?document.getElementById('fltAffSearch').value:'').toLowerCase();var st=document.getElementById('fltAffStatus')?document.getElementById('fltAffStatus').value:'';var affs=DB.affiliates.slice();if(st)affs=affs.filter(function(a){return (a.status||'aprovado')===st;});if(q)affs=affs.filter(function(a){return (a.name+' '+a.code).toLowerCase().indexOf(q)>=0;});var sales=DB.sales.filter(function(s){return s.status==='pago';});var html='';var pendentes=affs.filter(function(a){return a.status==='pendente';});if(pendentes.length){html+='<div class="col-span-full glass border border-nexvon-warning/40 rounded-xl p-4 mb-2"><h4 class="font-bold text-nexvon-warning mb-2">Pendentes ('+pendentes.length+'):</h4><div class="grid md:grid-cols-2 gap-3">'+pendentes.map(function(a){return '<div class="bg-black/30 p-3 rounded-lg flex justify-between items-center"><div><div class="font-semibold text-sm">'+a.name+'</div><div class="text-xs text-nexvon-gold font-mono">'+a.code+'</div></div><div class="flex gap-2"><button class="btn btn-gold text-xs" onclick="approveAff(\''+a.id+'\')">Aprovar</button><button class="btn btn-danger text-xs" onclick="rejectAff(\''+a.id+'\')">Recusar</button></div></div>';}).join('')+'</div></div>';}var ativos=affs.filter(function(a){return a.status!=='pendente';});html+=ativos.map(function(a){var as=sales.filter(function(s){return s.affiliateId===a.id;});var r=a.commission||DB.settings.defaultCommission;var gen=as.reduce(function(t,s){return t+s.value;},0);var stBadge=a.status==='rejeitado'?'<span class="badge bg-red-500/20 text-red-400">Rejeitado</span>':'<span class="badge bg-green-500/20 text-green-400">Aprovado</span>';return '<div class="card-premium p-5"><div class="flex justify-between items-start mb-3"><div><h4 class="font-bold font-display">'+a.name+'</h4><p class="text-xs text-gray-400">'+(a.contact||'—')+'</p></div><div><span class="badge bg-nexvon-gold/20 text-nexvon-gold">'+r+'%</span> '+stBadge+'</div></div><div class="grid grid-cols-3 gap-2 text-center text-xs mb-2"><div><div class="font-bold">'+as.length+'</div><div class="text-gray-400">Vendas</div></div><div><div class="font-bold text-gold">'+BRL(gen)+'</div><div class="text-gray-400">Gerado</div></div><div><div class="font-bold text-nexvon-warning">'+BRL(gen*r/100)+'</div><div class="text-gray-400">Comissão</div></div></div><div class="flex gap-2"><button class="btn btn-ghost text-xs flex-1" onclick="editAff(\''+a.id+'\')"><i class="fa fa-edit"></i></button><button class="btn btn-danger text-xs flex-1" onclick="delAff(\''+a.id+'\')"><i class="fa fa-trash"></i></button></div></div>';}).join('');if(!affs.length)html='<p class="text-gray-500 col-span-3 text-center py-8">Nenhum afiliado.</p>';document.getElementById('affCards').innerHTML=html;}
-function renderComm(){var filter=document.getElementById('fltCommPaid')?document.getElementById('fltCommPaid').value:'';var sales=DB.sales.filter(function(s){return s.status==='pago';});var affs=DB.affiliates.filter(function(a){return a.status==='aprovado'||!a.status;});var rows='';affs.forEach(function(a){var as=sales.filter(function(s){return s.affiliateId===a.id;});var r=a.commission||DB.settings.defaultCommission;var gen=as.reduce(function(t,s){return t+s.value;},0);var comm=gen*r/100;var paid=DB.paidCommissions[a.id];if(filter==='pending'&&paid)return;if(filter==='paid'&&!paid)return;rows+='<tr><td class="font-semibold">'+a.name+'</td><td>'+as.length+'</td><td>'+r+'%</td><td>'+BRL(gen)+'</td><td class="font-bold text-nexvon-warning">'+BRL(comm)+'</td><td>'+(paid?'<span class="badge bg-green-500/20 text-green-400">Pago</span>':'<span class="badge bg-yellow-500/20 text-yellow-400">Pendente</span>')+'</td><td><button class="btn '+(paid?'btn-ghost':'btn-gold')+' text-xs" onclick="togglePaid(\''+a.id+'\')">'+(paid?'Desfazer':'Marcar Pago')+'</button></td></tr>';});document.getElementById('commTable').innerHTML=rows||'<tr><td colspan="8" class="text-center text-gray-500 py-6">Sem comissões.</td></tr>';}
-function togglePaid(id){if(DB.paidCommissions[id])delete DB.paidCommissions[id];else DB.paidCommissions[id]=new Date().toISOString();saveDB();renderAll();}
-function approveAff(id){var a=DB.affiliates.find(function(x){return x.id===id;});if(!a)return;a.status='aprovado';saveDB();renderAll();toast('Afiliado aprovado!','success');}
-function rejectAff(id){if(!confirm('Recusar?'))return;var a=DB.affiliates.find(function(x){return x.id===id;});if(!a)return;a.status='rejeitado';saveDB();renderAll();}
-function saveSiteUrl(){var u=document.getElementById('setSiteUrl').value.trim();if(!u){toast('URL inválida.','error');return;}DB.settings.siteUrl=u;SITE_URL=u;saveDB();toast('URL salva!','success');}
-function openModal(id){if(id==='saleModal'){document.getElementById('saleModalTitle').textContent='Nova Venda';document.getElementById('saleId').value='';document.getElementById('saleClient').value='';document.getElementById('saleValue').value=DB.settings.productPrice||540;document.getElementById('saleMethod').value='PIX';document.getElementById('saleStatus').value='pago';document.getElementById('saleAff').innerHTML='<option value="">— Sem afiliado —</option>'+DB.affiliates.filter(function(a){return a.status==='aprovado'||!a.status;}).map(function(a){return '<option value="'+a.id+'">'+a.name+' ('+a.code+')</option>';}).join('');}document.getElementById(id).classList.add('open');}
+function currentAff(){return JSON.parse(sessionStorage.getItem(AFF_SESS)||'null');}
+function showAffPanel(a){document.getElementById('aff-login').classList.add('hidden');document.getElementById('aff-register').classList.add('hidden');document.getElementById('aff-dashboard').classList.remove('hidden');const rate=a.commission||DB.settings.defaultCommission;const sales=DB.sales.filter(s=>s.affiliateId===a.id&&s.status==='pago');const gen=sales.reduce((t,s)=>t+s.value,0);const earned=gen*rate/100;const withdrawn=(a.withdrawals||[]).reduce((t,w)=>t+w.amount,0);const available=earned-withdrawn;document.getElementById('affName').textContent=a.name;document.getElementById('affCodeShow').textContent='Código: '+a.code;document.getElementById('affClicks').textContent=DB.clicks[a.code]||0;document.getElementById('affSales').textContent=sales.length;document.getElementById('affEarned').textContent=BRL(earned);document.getElementById('affAvailable').textContent=BRL(available);document.getElementById('affRate').textContent=rate;document.getElementById('affLink').value=affLinkOf(a.code);const paid=DB.paidCommissions[a.id];document.getElementById('affPayStatus').innerHTML=paid?'<span class="badge bg-green-500/20 text-green-400">✓ Última comissão paga</span> em '+paid.slice(0,10):'<span class="badge bg-yellow-500/20 text-yellow-400">Pendente</span>';const b=a.bank||{};document.getElementById('bankHolder').value=b.holder||'';document.getElementById('bankCPF').value=b.cpf||'';document.getElementById('bankName').value=b.bankName||'';document.getElementById('bankAgency').value=b.agency||'';document.getElementById('bankAccount').value=b.account||'';document.getElementById('bankType').value=b.type||'corrente';document.getElementById('bankPix').value=b.pix||'';const wb=document.getElementById('withdrawBtn');if(bankComplete(b)){wb.className='btn btn-gold btn-premium';wb.innerHTML='<i class="fa fa-money-bill-wave"></i> Solicitar Saque';}else{wb.className='btn btn-danger';wb.innerHTML='<i class="fa fa-lock"></i> Saque Bloqueado — Cadastre Dados Bancários';}renderAffSales();renderAffWithdrawals();setupAffTabs();startAffPolling();}
+let _affInt=null;
+function startAffPolling(){if(window._affInt)clearInterval(window._affInt);window._affInt=setInterval(()=>{try{DB=loadDB();const a=currentAff();if(!a)return;const f=DB.affiliates.find(x=>x.id===a.id);if(!f)return;sessionStorage.setItem(AFF_SESS,JSON.stringify(f));if(document.getElementById('aff-dashboard').classList.contains('hidden'))return;const rate=f.commission||DB.settings.defaultCommission;const sl=DB.sales.filter(s=>s.affiliateId===f.id&&s.status==='pago');const gen=sl.reduce((t,s)=>t+s.value,0);const earned=gen*rate/100;const wd=(f.withdrawals||[]).reduce((t,w)=>t+w.amount,0);document.getElementById('affClicks').textContent=DB.clicks[f.code]||0;document.getElementById('affSales').textContent=sl.length;document.getElementById('affEarned').textContent=BRL(earned);document.getElementById('affAvailable').textContent=BRL(earned-wd);}catch(e){}},5000);}
+function setupAffTabs(){document.querySelectorAll('.aff-tab').forEach(t=>{t.onclick=()=>{document.querySelectorAll('.aff-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.querySelectorAll('.aff-tab-content').forEach(c=>c.classList.add('hidden'));document.getElementById('afftab-'+t.dataset.afftab).classList.remove('hidden');};});}
+function renderAffSales(){const a=currentAff();if(!a)return;const q=(document.getElementById('affSearch')?.value||'').toLowerCase();const st=document.getElementById('affFilterStatus')?.value||'';let sales=DB.sales.filter(s=>s.affiliateId===a.id);if(st)sales=sales.filter(s=>s.status===st);if(q)sales=sales.filter(s=>s.client.toLowerCase().includes(q));const rate=a.commission||DB.settings.defaultCommission;document.getElementById('affSalesTable').innerHTML=sales.map(s=>{const stc=s.status==='pago'?'bg-green-500/20 text-green-400':s.status==='pendente'?'bg-yellow-500/20 text-yellow-400':'bg-red-500/20 text-red-400';return `<tr><td>${s.date}</td><td>${s.client}</td><td>${s.method}</td><td>${BRL(s.value)}</td><td class="text-nexvon-warning font-semibold">${BRL(s.value*rate/100)}</td><td><span class="badge ${stc}">${s.status}</span></td></tr>`;}).join('')||'<tr><td colspan="6" class="text-center text-gray-500 py-6">Nenhuma venda encontrada.</td></tr>';}
+function renderAffWithdrawals(){const a=currentAff();if(!a)return;const wd=a.withdrawals||[];document.getElementById('affWithdrawTable').innerHTML=wd.length?wd.map(w=>`<tr><td>${w.date}</td><td class="font-bold text-gold">${BRL(w.amount)}</td><td><span class="badge bg-blue-500/20 text-blue-400">Solicitado</span></td><td>dia 10 (${w.payDate})</td></tr>`).join(''):'<tr><td colspan="4" class="text-center text-gray-500 py-6">Nenhum saque solicitado.</td></tr>';}
+function copyAffLink(){const el=document.getElementById('affLink');el.select();navigator.clipboard.writeText(el.value);toast('Link copiado!','success');}
+function shareAffLink(){const a=currentAff();if(!a)return;const link=affLinkOf(a.code);const text=encodeURIComponent('🔥 NEXVON FLUENCY 🔥\n\nDomine qualquer idioma ASSISTINDO O QUE VOCÊ AMA! 🌍✨\n\nAcesso vitalício — pagou, é seu para sempre.\n\n🌐 www.nexvonfluency.com.br\n\n👉 '+link);window.open('https://wa.me/?text='+text,'_blank');}
+function saveBankProfile(){const a=currentAff();if(!a)return;const holder=document.getElementById('bankHolder').value.trim();const cpf=document.getElementById('bankCPF').value.trim();const bankName=document.getElementById('bankName').value.trim();const agency=document.getElementById('bankAgency').value.trim();const account=document.getElementById('bankAccount').value.trim();if(!holder||!cpf||!bankName||!agency||!account){toast('Preencha todos os campos obrigatórios: titular, CPF/CNPJ, banco, agência e conta.','error');return;}const idx=DB.affiliates.findIndex(x=>x.id===a.id);DB.affiliates[idx].bank={holder,cpf,bankName,agency,account,type:document.getElementById('bankType').value,pix:document.getElementById('bankPix').value.trim()};sessionStorage.setItem(AFF_SESS,JSON.stringify(DB.affiliates[idx]));saveDB();toast('Dados bancários salvos! Saque liberado.','success');const wb=document.getElementById('withdrawBtn');wb.className='btn btn-gold btn-premium';wb.innerHTML='<i class="fa fa-money-bill-wave"></i> Solicitar Saque';}
+function changeAffPass(){const a=currentAff();if(!a)return;const p1=document.getElementById('affNewPass').value,p2=document.getElementById('affNewPass2').value;if(!p1||p1!==p2){toast('As senhas não coincidem.','error');return;}const idx=DB.affiliates.findIndex(x=>x.id===a.id);DB.affiliates[idx].password=p1;sessionStorage.setItem(AFF_SESS,JSON.stringify(DB.affiliates[idx]));saveDB();document.getElementById('affNewPass').value='';document.getElementById('affNewPass2').value='';toast('Senha alterada!','success');}
+function requestWithdraw(){const a=currentAff();if(!a)return;const b=a.bank||{};if(!bankComplete(b)){toast('Cadastro bancário incompleto! Preencha titular, CPF, banco, agência e conta.','error');document.querySelector('[data-afftab="perfil"]').click();return;}const rate=a.commission||DB.settings.defaultCommission;const sales=DB.sales.filter(s=>s.affiliateId===a.id&&s.status==='pago');const earned=sales.reduce((t,s)=>t+s.value,0)*rate/100;const withdrawn=(a.withdrawals||[]).reduce((t,w)=>t+w.amount,0);const available=earned-withdrawn;if(available<=0){toast('Nenhum valor disponível para saque.','info');return;}document.getElementById('withdrawAmount').textContent=BRL(available);document.getElementById('withdrawModal').classList.add('open');}
+function confirmWithdraw(){const a=currentAff();if(!a)return;const idx=DB.affiliates.findIndex(x=>x.id===a.id);const rate=a.commission||DB.settings.defaultCommission;const sales=DB.sales.filter(s=>s.affiliateId===a.id&&s.status==='pago');const earned=sales.reduce((t,s)=>t+s.value,0)*rate/100;const withdrawn=(DB.affiliates[idx].withdrawals||[]).reduce((t,w)=>t+w.amount,0);const amount=earned-withdrawn;if(!DB.affiliates[idx].withdrawals)DB.affiliates[idx].withdrawals=[];DB.affiliates[idx].withdrawals.push({id:'S'+Date.now(),amount,date:new Date().toLocaleDateString('pt-BR'),payDate:next10(),status:'solicitado'});sessionStorage.setItem(AFF_SESS,JSON.stringify(DB.affiliates[idx]));saveDB();closeModal('withdrawModal');alert('✅ Seu saque de '+BRL(amount)+' foi solicitado com sucesso!\n\nFavor aguardar a data do próximo dia 10: '+next10()+'.\n\nO valor será depositado em sua conta bancária cadastrada.');showAffPanel(DB.affiliates[idx]);document.querySelector('[data-afftab="saques"]').click();}
+function adminLogin(){var pass=document.getElementById('adminPassInput').value;var username=(document.getElementById('adminUserInput')||{value:''}).value.trim();
+if(username){sbRpc('operator_login',{op_username:username,pass:pass}).then(function(r){var d=r&&r.data;var err=r&&r.error;if(err&&err.message!=='offline'){toast('Erro: '+err.message,'error');return;}if(!d||d.error){var op=(DB.operators||[]).find(function(o){return o.username===username&&o.password===pass&&o.active!==false;});if(op){sessionStorage.setItem(OP_SESS,JSON.stringify({id:op.id,name:op.name,username:op.username,permissions:op.permissions||[]}));localStorage.setItem('nf_admin','1');document.getElementById('admin-login').classList.add('hidden');document.getElementById('admin-dashboard').classList.remove('hidden');toast('Bem-vindo, '+op.name+'!','success');renderAll();return;}toast('Usuário ou senha incorretos.','error');return;}sessionStorage.setItem(OP_SESS,JSON.stringify({id:d.id,name:d.name,username:d.username,permissions:d.permissions||[]}));localStorage.setItem('nf_admin','1');document.getElementById('admin-login').classList.add('hidden');document.getElementById('admin-dashboard').classList.remove('hidden');toast('Bem-vindo, '+d.name+'!','success');renderAll();}).catch(function(){toast('Erro de conexão.','error');});return;}
+sessionStorage.removeItem(OP_SESS);var pass=document.getElementById('adminPassInput').value;if(document.getElementById('adminPassInput').value===getPass()){localStorage.setItem('nf_admin','1');document.getElementById('admin-login').classList.add('hidden');document.getElementById('admin-dashboard').classList.remove('hidden');document.getElementById('setSiteUrl').value=DB.settings.siteUrl||SITE_URL;document.getElementById('defComm').value=DB.settings.defaultCommission||20;toast('Acesso liberado!','success');renderAll();setupAdminTabs();}else toast('Senha incorreta','error');}
+function adminLogout(){localStorage.removeItem('nf_admin');location.reload();}
+function setupAdminTabs(){document.querySelectorAll('.admin-tab').forEach(t=>{t.onclick=()=>{document.querySelectorAll('.admin-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.querySelectorAll('.adm-content').forEach(c=>c.classList.add('hidden'));document.getElementById('adm-'+t.dataset.tab).classList.remove('hidden');renderAll();};});}
+function renderAll(){try{renderOperators();}catch(e){}renderDashboard();renderSales();renderAffCards();renderComm();const fa=document.getElementById('fltAff');if(fa)fa.innerHTML='<option value="">Todos afiliados</option>'+DB.affiliates.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');}
+function renderDashboard(){const sales=DB.sales.filter(s=>s.status==='pago');let rev=0,comm=0;sales.forEach(s=>{rev+=s.value;if(s.affiliateId){const a=DB.affiliates.find(x=>x.id===s.affiliateId);const r=a?(a.commission||DB.settings.defaultCommission):DB.settings.defaultCommission;comm+=s.value*r/100;}});document.getElementById('stSales').textContent=DB.sales.length;document.getElementById('stRevenue').textContent=BRL(rev);document.getElementById('stComm').textContent=BRL(comm);document.getElementById('stAff').textContent=DB.affiliates.filter(a=>a.status==='aprovado'||!a.status).length;document.getElementById('latestSales').innerHTML=DB.sales.slice(-5).reverse().map(s=>`<div class="flex justify-between p-2 border-b border-white/5"><span>${s.client}</span><span class="text-gold font-semibold">${BRL(s.value)}</span><span class="badge ${s.status==='pago'?'bg-green-500/20 text-green-400':'bg-yellow-500/20 text-yellow-400'}">${s.status}</span></div>`).join('')||'<p class="text-gray-500">Nenhuma venda.</p>';}
+function renderSales(){const q=(document.getElementById('fltSearch')?.value||'').toLowerCase();const st=document.getElementById('fltStatus')?.value||'';const mt=document.getElementById('fltMethod')?.value||'';const af=document.getElementById('fltAff')?.value||'';let sales=DB.sales.slice();if(q)sales=sales.filter(s=>s.client.toLowerCase().includes(q));if(st)sales=sales.filter(s=>s.status===st);if(mt)sales=sales.filter(s=>s.method===mt);if(af)sales=sales.filter(s=>s.affiliateId===af);document.getElementById('salesTable').innerHTML=sales.map(s=>{const a=DB.affiliates.find(x=>x.id===s.affiliateId);const r=a?(a.commission||DB.settings.defaultCommission):0;const stc=s.status==='pago'?'bg-green-500/20 text-green-400':s.status==='pendente'?'bg-yellow-500/20 text-yellow-400':'bg-red-500/20 text-red-400';const lead=s.leadEmail?`<div class="text-[10px] text-gray-500">📧 ${s.leadEmail} · 📱 ${s.leadWhats||''} · 🆔 ${s.leadDoc||''} · 📦 ${s.leadQty||1}x · 🎂 ${s.leadBirth||''}</div>`:'';return `<tr><td class="font-mono text-xs">${s.id}</td><td>${s.date}</td><td class="font-semibold">${s.client}${lead}</td><td>${s.method}</td><td class="font-semibold">${BRL(s.value)}</td><td>${a?a.name:'—'}</td><td class="text-nexvon-warning">${a?BRL(s.value*r/100):'—'}</td><td><span class="badge ${stc}">${s.status}</span></td><td><div class="flex gap-1 flex-wrap">${s.leadWhats?`<button class="btn text-xs" style="background:#25D366;color:#fff" onclick="saleWhatsapp('${s.id}')" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></button>`:''}${s.leadEmail?`<button class="btn btn-ghost text-xs" onclick="saleEmail('${s.id}')" title="E-mail"><i class="fa fa-envelope"></i></button><button class="btn btn-gold text-xs" onclick="editLead('${s.id}')" title="Ver/Editar dados"><i class="fa fa-id-card"></i></button>`:''}<button class="btn btn-ghost text-xs" onclick="editSale('${s.id}')" title="Editar"><i class="fa fa-edit"></i></button><button class="btn btn-danger text-xs" onclick="delSale('${s.id}')" title="Excluir"><i class="fa fa-trash"></i></button></div></td></tr>`;}).join('')||'<tr><td colspan="9" class="text-center text-gray-500 py-6">Nenhuma venda encontrada.</td></tr>';}
+function saleWhatsapp(id){const s=DB.sales.find(x=>x.id===id);if(!s||!s.leadWhats){toast('WhatsApp não cadastrado.','error');return;}const d=s.leadWhats.replace(/\D/g,'').slice(-11);window.open('https://wa.me/55'+d+'?text='+encodeURIComponent('Olá '+s.client+'! Aqui é a NEXVON FLUENCY.'),'_blank');}
+function saleEmail(id){const s=DB.sales.find(x=>x.id===id);if(!s||!s.leadEmail){toast('E-mail não cadastrado.','error');return;}window.location.href='mailto:'+s.leadEmail+'?subject='+encodeURIComponent('NEXVON FLUENCY — Seu acesso')+'&body='+encodeURIComponent('Olá '+s.client+'!');}
+function editLead(id){const s=DB.sales.find(x=>x.id===id);if(!s)return;document.getElementById('leadEditId').value=id;document.getElementById('leadEditName').value=s.client||'';document.getElementById('leadEditEmail').value=s.leadEmail||'';document.getElementById('leadEditWhats').value=s.leadWhats||'';document.getElementById('leadEditDoc').value=s.leadDoc||'';document.getElementById('leadEditQty').value=s.leadQty||1;document.getElementById('leadEditBirth').value=s.leadBirth||'';document.getElementById('leadEditModal').classList.add('open');}
+function saveLead(){const id=document.getElementById('leadEditId').value;const s=DB.sales.find(x=>x.id===id);if(!s)return;const n=document.getElementById('leadEditName').value.trim();if(n)s.client=n;s.leadEmail=document.getElementById('leadEditEmail').value.trim();s.leadWhats=document.getElementById('leadEditWhats').value.trim();s.leadDoc=document.getElementById('leadEditDoc').value.trim();s.leadQty=parseInt(document.getElementById('leadEditQty').value)||1;s.leadBirth=document.getElementById('leadEditBirth').value;saveDB();closeModal('leadEditModal');renderAll();toast('Dados cadastrais atualizados!','success');}
+function renderAffCards(){const q=(document.getElementById('fltAffSearch')?.value||'').toLowerCase();const st=document.getElementById('fltAffStatus')?.value||'';let affs=DB.affiliates.slice();if(st)affs=affs.filter(a=>(a.status||'aprovado')===st);if(q)affs=affs.filter(a=>(a.name+' '+a.code).toLowerCase().includes(q));const sales=DB.sales.filter(s=>s.status==='pago');let html='';const pendentes=affs.filter(a=>a.status==='pendente');if(pendentes.length){html+=`<div class="col-span-full glass border border-nexvon-warning/40 rounded-xl p-4 mb-2"><h4 class="font-bold text-nexvon-warning mb-2"><i class="fa fa-hourglass-half mr-2"></i> Solicitações Pendentes (${pendentes.length}):</h4><div class="grid md:grid-cols-2 gap-3">`+pendentes.map(a=>`<div class="bg-black/30 p-3 rounded-lg flex justify-between items-center flex-wrap gap-2"><div><div class="font-semibold text-sm">${a.name}</div><div class="text-xs text-gray-400">${a.contact||''}</div><div class="text-xs text-nexvon-gold font-mono">Código: ${a.code}</div></div><div class="flex gap-2"><button class="btn btn-gold text-xs" onclick="approveAff('${a.id}')"><i class="fa fa-check"></i> Aprovar</button><button class="btn btn-danger text-xs" onclick="rejectAff('${a.id}')"><i class="fa fa-times"></i> Recusar</button></div></div>`).join('')+`</div></div>`;}const ativos=affs.filter(a=>a.status!=='pendente');html+=ativos.map(a=>{const as=sales.filter(s=>s.affiliateId===a.id);const r=a.commission||DB.settings.defaultCommission;const gen=as.reduce((t,s)=>t+s.value,0);const link=affLinkOf(a.code);const stBadge=a.status==='rejeitado'?'<span class="badge bg-red-500/20 text-red-400">Rejeitado</span>':'<span class="badge bg-green-500/20 text-green-400">✓ Aprovado</span>';const hasBank=bankComplete(a.bank)?'<span class="badge bg-blue-500/20 text-blue-400 ml-1">Banco OK</span>':'';const kycBadge=a.kyc&&a.kyc.selfie?(a.kyc.status==='aprovado'?'<span class="badge bg-green-500/20 text-green-400 ml-1">KYC ✓</span>':'<span class="badge bg-yellow-500/20 text-yellow-400 ml-1">KYC ⏳</span>'):'<span class="badge bg-red-500/20 text-red-400 ml-1">Sem KYC</span>';return `<div class="card-premium p-5"><div class="flex justify-between items-start mb-3"><div><h4 class="font-bold font-display">${a.name}</h4><p class="text-xs text-gray-400">${a.contact||'—'}</p></div><div class="text-right"><span class="badge bg-nexvon-gold/20 text-nexvon-gold">${r}%</span><div class="mt-1">${stBadge}${hasBank}${kycBadge}</div></div></div><div class="text-xs bg-black/30 p-2 rounded mb-3 break-all font-mono text-nexvon-infinitepay">🔗 ${link}</div><button class="btn btn-ghost text-xs w-full justify-center mb-3" onclick="navigator.clipboard.writeText('${link}');toast('Link copiado!','success')"><i class="fa fa-copy"></i> Copiar Link</button><div class="grid grid-cols-3 gap-2 text-center text-xs"><div><div class="font-bold">${as.length}</div><div class="text-gray-400">Vendas</div></div><div><div class="font-bold text-gold">${BRL(gen)}</div><div class="text-gray-400">Gerado</div></div><div><div class="font-bold text-nexvon-warning">${BRL(gen*r/100)}</div><div class="text-gray-400">Comissão</div></div></div><div class="flex gap-2 mt-2"><button class="btn text-xs flex-1 justify-center" style="background:#25D366;color:#fff" onclick="affWhatsapp('${a.id}')" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i> ZAP</button><button class="btn btn-ghost text-xs flex-1 justify-center" onclick="affEmail('${a.id}')" title="E-mail"><i class="fa fa-envelope"></i> E-mail</button><button class="btn btn-ghost text-xs flex-1 justify-center" onclick="openKycView('${a.id}')" title="Ver KYC"><i class="fa fa-id-card"></i> KYC</button></div><div class="flex gap-2 mt-2"><button class="btn btn-ghost text-xs flex-1 justify-center" onclick="editAff('${a.id}')"><i class="fa fa-edit"></i></button>${a.status==='rejeitado'?`<button class="btn btn-gold text-xs flex-1 justify-center" onclick="approveAff('${a.id}')"><i class="fa fa-check"></i> Reaprovar</button>`:''}<button class="btn btn-danger text-xs flex-1 justify-center" onclick="delAff('${a.id}')"><i class="fa fa-trash"></i></button></div></div>`;}).join('');if(!affs.length)html='<p class="text-gray-500 col-span-3 text-center py-8">Nenhum afiliado encontrado.</p>';document.getElementById('affCards').innerHTML=html;}
+function renderComm(){const filter=document.getElementById('fltCommPaid')?.value||'';const sales=DB.sales.filter(s=>s.status==='pago');const affs=DB.affiliates.filter(a=>a.status==='aprovado'||!a.status);let rows='';affs.forEach(a=>{const as=sales.filter(s=>s.affiliateId===a.id);const r=a.commission||DB.settings.defaultCommission;const gen=as.reduce((t,s)=>t+s.value,0);const comm=gen*r/100;const paid=DB.paidCommissions[a.id];if(filter==='pending'&&paid)return;if(filter==='paid'&&!paid)return;const ok=bankComplete(a.bank);rows+=`<tr><td class="font-semibold">${a.name}<div class="text-[10px] text-gray-500 font-mono">${a.code}</div></td><td>${as.length}</td><td>${r}%</td><td>${BRL(gen)}</td><td class="font-bold text-nexvon-warning">${BRL(comm)}</td><td>${paid?'<span class="badge bg-green-500/20 text-green-400">✓ Pago</span>':'<span class="badge bg-yellow-500/20 text-yellow-400">Pendente</span>'}</td><td class="text-xs ${ok?'text-gray-300':'text-red-400'}" title="${bankText(a.bank)}">${ok?'<i class="fa fa-university text-nexvon-success"></i> '+a.bank.bankName+' · Ag '+a.bank.agency+' · Cta '+a.bank.account:'<i class="fa fa-exclamation-triangle"></i> Solicite o cadastro'}</td><td><button class="btn ${paid?'btn-ghost':'btn-gold'} text-xs" onclick="togglePaid('${a.id}')">${paid?'<i class="fa fa-undo"></i> Desfazer':'<i class="fa fa-check"></i> Marcar Pago'}</button></td></tr>`;});document.getElementById('commTable').innerHTML=rows||'<tr><td colspan="8" class="text-center text-gray-500 py-6">Sem comissões.</td></tr>';}
+function togglePaid(id){const p=DB.paidCommissions;if(p[id])delete p[id];else p[id]=new Date().toISOString();saveDB();renderAll();}
+function approveAff(id){const a=DB.affiliates.find(x=>x.id===id);if(!a)return;a.status='aprovado';saveDB();renderAll();toast('Afiliado '+a.name+' APROVADO!','success');}
+function rejectAff(id){if(!confirm('Recusar este afiliado?'))return;const a=DB.affiliates.find(x=>x.id===id);if(!a)return;a.status='rejeitado';saveDB();renderAll();toast('Afiliado recusado.','info');}
+function affDigits(a){const m=(a.contact||'').match(/\d+/g);return m?m.join('').slice(-11):'';}
+function affWhatsapp(id){const a=DB.affiliates.find(x=>x.id===id);if(!a)return;const d=affDigits(a);if(!d||d.length<10){toast('WhatsApp não cadastrado. Edite o afiliado.','error');return;}window.open('https://wa.me/55'+d+'?text='+encodeURIComponent('Olá '+a.name+'! Aqui é a NEXVON FLUENCY.'),'_blank');}
+function affEmail(id){const a=DB.affiliates.find(x=>x.id===id);if(!a)return;const m=(a.contact||'').match(/[\w.+-]+@[\w-]+\.[\w.-]+/);if(!m){toast('E-mail não cadastrado. Edite o afiliado.','error');return;}window.location.href='mailto:'+m[0]+'?subject='+encodeURIComponent('NEXVON FLUENCY — Programa de Afiliados')+'&body='+encodeURIComponent('Olá '+a.name+'!');}
+function saveSiteUrl(){const u=document.getElementById('setSiteUrl').value.trim();if(!u){toast('URL inválida.','error');return;}DB.settings.siteUrl=u;SITE_URL=u;saveDB();toast('URL do site salva: '+u,'success');}
+function openModal(id){if(id==='saleModal'){document.getElementById('saleModalTitle').textContent='Nova Venda';document.getElementById('saleId').value='';document.getElementById('saleClient').value='';document.getElementById('saleValue').value=DB.settings.productPrice||540;document.getElementById('saleMethod').value='PIX';document.getElementById('saleStatus').value='pago';document.getElementById('saleAff').innerHTML='<option value="">— Sem afiliado —</option>'+DB.affiliates.filter(a=>a.status==='aprovado'||!a.status).map(a=>`<option value="${a.id}">${a.name} (${a.code})</option>`).join('');}document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
-function editAff(id){var a=DB.affiliates.find(function(x){return x.id===id;});if(!a)return;document.getElementById('affModalTitle').textContent='Editar Afiliado';document.getElementById('affId').value=a.id;document.getElementById('affName').value=a.name;document.getElementById('affContact').value=a.contact||'';document.getElementById('affCode').value=a.code;document.getElementById('affComm').value=a.commission||'';document.getElementById('affPass').value='';document.getElementById('affModal').classList.add('open');}
-function saveAff(){var id=document.getElementById('affId').value;var name=document.getElementById('affName').value.trim();if(!name){toast('Informe o nome.','error');return;}var code=document.getElementById('affCode').value.trim().toUpperCase()||'NF'+Math.random().toString(36).slice(2,7).toUpperCase();var pass=document.getElementById('affPass').value;var data={id:id||'A'+Date.now(),name:name,contact:document.getElementById('affContact').value,code:code,password:pass||undefined,commission:parseFloat(document.getElementById('affComm').value)||DB.settings.defaultCommission,status:'aprovado'};if(id){var i=DB.affiliates.findIndex(function(x){return x.id===id;});data.clicks=DB.affiliates[i].clicks||0;data.bank=DB.affiliates[i].bank||{};data.withdrawals=DB.affiliates[i].withdrawals||[];data.kyc=DB.affiliates[i].kyc;DB.affiliates[i]=Object.assign({},DB.affiliates[i],data);}else{data.clicks=0;data.bank={};data.withdrawals=[];DB.affiliates.push(data);}saveDB();closeModal('affModal');renderAll();toast('Afiliado salvo!','success');}
-function delAff(id){if(confirm('Excluir?')){DB.affiliates=DB.affiliates.filter(function(a){return a.id!==id;});saveDB();renderAll();}}
-function changeAdminPass(){
-  var p=document.getElementById('newPass').value;if(!p){toast('Digite uma senha.','error');return;}
-  var oldPass=sessionStorage.getItem(ADMIN_PASS_KEY);
-  sbRpc('admin_change_pass',{old_pass:oldPass,new_pass:p}).then(function(r){
-    if(r&&r.data==='ok'){sessionStorage.setItem(ADMIN_PASS_KEY,p);localStorage.setItem('nf_admin_pass_local',p);document.getElementById('newPass').value='';toast('Senha alterada!','success');}
-    else toast('Erro ao alterar senha.','error');
-  }).catch(function(){toast('Erro de conexão.','error');});
-}
-function saveDefComm(){DB.settings.defaultCommission=parseFloat(document.getElementById('defComm').value)||20;saveDB();toast('Comissão salva!','success');}
-function downloadDB(){var blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nexvon-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('Backup baixado!','success');}
-function restoreDB(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{var d=JSON.parse(ev.target.result);if(!d.sales||!d.affiliates){toast('Arquivo inválido.','error');return;}if(!confirm('Restaurar?'))return;DB=Object.assign(defaultDB(),d);if(DB.settings.siteUrl)SITE_URL=DB.settings.siteUrl;saveDB();renderAll();toast('Restaurado!','success');}catch(err){toast('Erro: '+err.message,'error');}};r.readAsText(f);}
+function editSale(id){const s=DB.sales.find(x=>x.id===id);if(!s)return;document.getElementById('saleModalTitle').textContent='Editar Venda';document.getElementById('saleId').value=s.id;document.getElementById('saleClient').value=s.client;document.getElementById('saleValue').value=s.value;document.getElementById('saleMethod').value=s.method;document.getElementById('saleStatus').value=s.status;document.getElementById('saleAff').innerHTML='<option value="">— Sem afiliado —</option>'+DB.affiliates.map(a=>`<option value="${a.id}" ${s.affiliateId===a.id?'selected':''}>${a.name}</option>`).join('');document.getElementById('saleModal').classList.add('open');}
+function saveSale(){const id=document.getElementById('saleId').value;const data={id:id||'V'+Date.now().toString().slice(-6),date:new Date().toISOString().slice(0,10),client:document.getElementById('saleClient').value||'Cliente Avulso',method:document.getElementById('saleMethod').value,value:parseFloat(document.getElementById('saleValue').value)||0,affiliateId:document.getElementById('saleAff').value,status:document.getElementById('saleStatus').value};if(id){const i=DB.sales.findIndex(x=>x.id===id);DB.sales[i]=Object.assign(DB.sales[i],data);}else DB.sales.push(data);saveDB();closeModal('saleModal');renderAll();toast('Venda salva!','success');}
+function delSale(id){if(confirm('Excluir esta venda?')){DB.sales=DB.sales.filter(s=>s.id!==id);saveDB();renderAll();}}
+function editAff(id){const a=DB.affiliates.find(x=>x.id===id);if(!a)return;document.getElementById('affModalTitle').textContent='Editar Afiliado';document.getElementById('affId').value=a.id;document.getElementById('affName').value=a.name;document.getElementById('affContact').value=a.contact||'';document.getElementById('affCode').value=a.code;document.getElementById('affComm').value=a.commission||'';document.getElementById('affPass').value=a.password||'';document.getElementById('affModal').classList.add('open');}
+function saveAff(){const id=document.getElementById('affId').value;const name=document.getElementById('affName').value.trim();if(!name){toast('Informe o nome.','error');return;}let code=document.getElementById('affCode').value.trim().toUpperCase()||'NF'+Math.random().toString(36).slice(2,7).toUpperCase();const pass=document.getElementById('affPass').value||'123456';const data={id:id||'A'+Date.now(),name,contact:document.getElementById('affContact').value,code,password:pass,commission:parseFloat(document.getElementById('affComm').value)||DB.settings.defaultCommission,status:'aprovado'};if(id){const i=DB.affiliates.findIndex(x=>x.id===id);data.clicks=DB.affiliates[i].clicks||0;data.bank=DB.affiliates[i].bank||{};data.withdrawals=DB.affiliates[i].withdrawals||[];data.kyc=DB.affiliates[i].kyc;DB.affiliates[i]=Object.assign(DB.affiliates[i],data);}else{data.clicks=0;data.bank={};data.withdrawals=[];DB.affiliates.push(data);}saveDB();closeModal('affModal');renderAll();toast('Afiliado salvo!','success');}
+function delAff(id){if(confirm('Excluir este afiliado?')){DB.affiliates=DB.affiliates.filter(a=>a.id!==id);saveDB();renderAll();}}
+function changeAdminPass(){const p=document.getElementById('newPass').value;if(!p){toast('Digite uma senha.','error');return;}localStorage.setItem(PASS_KEY,p);document.getElementById('newPass').value='';toast('Senha alterada!','success');}
+function saveDefComm(){DB.settings.defaultCommission=parseFloat(document.getElementById('defComm').value)||20;saveDB();toast('Comissão padrão salva!','success');}
+function downloadDB(){const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nexvon-db-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('Backup baixado!','success');}
+function restoreDB(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!d.sales||!d.affiliates){toast('Arquivo inválido.','error');return;}if(!confirm('Restaurar backup?'))return;DB=Object.assign(defaultDB(),d);if(DB.settings.siteUrl)SITE_URL=DB.settings.siteUrl;saveDB();renderAll();toast('Banco restaurado!','success');}catch(err){toast('Erro: '+err.message,'error');}};r.readAsText(f);}
 function resetAll(){if(confirm('Apagar TUDO?')){DB=defaultDB();SITE_URL=DB.settings.siteUrl;saveDB();renderAll();toast('Dados zerados.','info');}}
+function _pdfHeader(doc,title,filterText){doc.setFontSize(18);doc.setTextColor(212,175,55);doc.text('NEXVON FLUENCY — '+title,14,20);doc.setFontSize(9);doc.setTextColor(120);doc.text('Gerado em: '+new Date().toLocaleString('pt-BR')+' | www.nexvonfluency.com.br',14,26);if(filterText){doc.setFontSize(9);doc.setTextColor(80);doc.text('Filtros: '+filterText,14,31);return 36;}return 32;}
+function exportPDF(){try{const {jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');doc.setFontSize(18);doc.setTextColor(212,175,55);doc.text('NEXVON FLUENCY — Relatorio',14,20);doc.setFontSize(10);doc.setTextColor(100);doc.text('Gerado em: '+new Date().toLocaleString('pt-BR')+' | www.nexvonfluency.com.br',14,27);let y=33;const sales=DB.sales;const pago=sales.filter(s=>s.status==='pago');let rev=0,comm=0;pago.forEach(s=>{rev+=s.value;if(s.affiliateId){const a=DB.affiliates.find(x=>x.id===s.affiliateId);const r=a?(a.commission||DB.settings.defaultCommission):DB.settings.defaultCommission;comm+=s.value*r/100;}});doc.autoTable({startY:y,head:[['Metricas','Valor']],body:[['Total de vendas',String(sales.length)],['Vendas pagas',String(pago.length)],['Receita total (BRL)',BRL(rev)],['Comissoes a pagar (BRL)',BRL(comm)],['Afiliados aprovados',String(DB.affiliates.filter(a=>a.status==='aprovado'||!a.status).length)],['Afiliados pendentes',String(DB.affiliates.filter(a=>a.status==='pendente').length)]]});y=doc.lastAutoTable.finalY+8;doc.setFontSize(13);doc.setTextColor(212,175,55);doc.text('Vendas',14,y);y+=3;doc.autoTable({startY:y,head:[['ID','Data','Cliente','Metodo','Valor BRL','Afiliado','Status']],body:sales.map(s=>{const a=DB.affiliates.find(x=>x.id===s.affiliateId);return [s.id,s.date,s.client,s.method,BRL(s.value),a?a.name:'-',s.status];})});y=doc.lastAutoTable.finalY+8;if(y>250){doc.addPage();y=20;}doc.setFontSize(13);doc.setTextColor(212,175,55);doc.text('Comissoes & Afiliados',14,y);y+=3;const affs=DB.affiliates.filter(a=>a.status==='aprovado'||!a.status);doc.autoTable({startY:y,head:[['Afiliado','Codigo','%','Vendas','Gerado BRL','A Pagar BRL','Status']],body:affs.map(a=>{const as=pago.filter(s=>s.affiliateId===a.id);const r=a.commission||DB.settings.defaultCommission;const gen=as.reduce((t,s)=>t+s.value,0);return [a.name,a.code,r+'%',String(as.length),BRL(gen),BRL(gen*r/100),DB.paidCommissions[a.id]?'Pago':'Pendente'];})});doc.save('nexvon-relatorio-'+new Date().toISOString().slice(0,10)+'.pdf');toast('Relatório PDF gerado!','success');}catch(e){toast('Erro: '+e.message,'error');}}
+function exportSalesPDF(){try{const {jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');const q=(document.getElementById('fltSearch')?.value||'').toLowerCase();const st=document.getElementById('fltStatus')?.value||'';const mt=document.getElementById('fltMethod')?.value||'';const af=document.getElementById('fltAff')?.value||'';let sales=DB.sales.slice();if(q)sales=sales.filter(s=>s.client.toLowerCase().includes(q));if(st)sales=sales.filter(s=>s.status===st);if(mt)sales=sales.filter(s=>s.method===mt);if(af)sales=sales.filter(s=>s.affiliateId===af);const affName=af?(DB.affiliates.find(x=>x.id===af)||{}).name||'':'';const ft=[q?'busca: '+q:'',st?'status: '+st:'',mt?'método: '+mt:'',affName?'afiliado: '+affName:''].filter(Boolean).join(' | ')||'nenhum';let y=_pdfHeader(doc,'Relatório de Vendas ('+sales.length+')',ft);const pago=sales.filter(s=>s.status==='pago');const rev=pago.reduce((t,s)=>t+s.value,0);doc.autoTable({startY:y,head:[['Resumo','Valor']],body:[['Vendas encontradas',String(sales.length)],['Vendas pagas',String(pago.length)],['Receita paga (BRL)',BRL(rev)]]});y=doc.lastAutoTable.finalY+6;doc.autoTable({startY:y,styles:{fontSize:7},head:[['ID','Data','Cliente','E-mail','WhatsApp','Documento','Qtd','Método','Valor (BRL)','Afiliado','Status']],body:sales.map(s=>{const a=DB.affiliates.find(x=>x.id===s.affiliateId);return [s.id,s.date,s.client,s.leadEmail||'-',s.leadWhats||'-',s.leadDoc||'-',String(s.leadQty||1),s.method,BRL(s.value),a?a.name:'-',s.status];})});doc.save('nexvon-vendas-'+new Date().toISOString().slice(0,10)+'.pdf');toast('PDF de Vendas gerado ('+sales.length+')!','success');}catch(e){toast('Erro: '+e.message,'error');}}
+function exportAffiliatesPDF(){try{const {jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');const q=(document.getElementById('fltAffSearch')?.value||'').toLowerCase();const st=document.getElementById('fltAffStatus')?.value||'';let affs=DB.affiliates.slice();if(st)affs=affs.filter(a=>(a.status||'aprovado')===st);if(q)affs=affs.filter(a=>(a.name+' '+a.code).toLowerCase().includes(q));const ft=[q?'busca: '+q:'',st?'status: '+st:''].filter(Boolean).join(' | ')||'nenhum';let y=_pdfHeader(doc,'Relatório de Afiliados ('+affs.length+')',ft);const sales=DB.sales.filter(s=>s.status==='pago');doc.autoTable({startY:y,styles:{fontSize:7},head:[['Nome','Código','%','Status','Contato','Cliques','Vendas','Gerado (BRL)','A Pagar (BRL)','Banco','KYC']],body:affs.map(a=>{const as=sales.filter(s=>s.affiliateId===a.id);const r=a.commission||DB.settings.defaultCommission;const gen=as.reduce((t,s)=>t+s.value,0);return [a.name,a.code,r+'%',a.status||'aprovado',(a.contact||'').slice(0,40),String(DB.clicks[a.code]||0),String(as.length),BRL(gen),BRL(gen*r/100),bankComplete(a.bank)?'Sim':'Não',a.kyc&&a.kyc.selfie?(a.kyc.status||'pendente'):'Não enviado'];})});doc.save('nexvon-afiliados-'+new Date().toISOString().slice(0,10)+'.pdf');toast('PDF de Afiliados gerado ('+affs.length+')!','success');}catch(e){toast('Erro: '+e.message,'error');}}
+function exportCommissionsPDF(){try{const {jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');const filter=document.getElementById('fltCommPaid')?.value||'';const sales=DB.sales.filter(s=>s.status==='pago');const affs=DB.affiliates.filter(a=>a.status==='aprovado'||!a.status);const rows=[];let total=0;affs.forEach(a=>{const as=sales.filter(s=>s.affiliateId===a.id);const r=a.commission||DB.settings.defaultCommission;const gen=as.reduce((t,s)=>t+s.value,0);const comm=gen*r/100;const paid=DB.paidCommissions[a.id];if(filter==='pending'&&paid)return;if(filter==='paid'&&!paid)return;total+=comm;const bk=a.bank||{};const ok=bankComplete(bk);rows.push([a.name,a.code,r+'%',String(as.length),BRL(gen),BRL(comm),paid?'Pago ('+paid.slice(0,10)+')':'Pendente',ok?bk.holder:'— NÃO CADASTRADO —',ok?bk.bankName:'—',ok?bk.agency:'—',ok?bk.account+' ('+(bk.type==='poupanca'?'Poupança':bk.type==='pagamento'?'Pagamento':'Corrente')+')':'—',ok?bk.cpf:'—',ok?(bk.pix||'—'):'—']);});const ft=filter==='pending'?'apenas pendentes':filter==='paid'?'apenas pagas':'todas';let y=_pdfHeader(doc,'Relatório de Comissões ('+rows.length+')',ft);const incompletos=rows.filter(r=>r[7]==='— NÃO CADASTRADO —').length;doc.autoTable({startY:y,head:[['Resumo','Valor']],body:[['Afiliados no relatório',String(rows.length)],['Total a pagar (BRL)',BRL(total)],['Sem dados bancários',String(incompletos)+(incompletos?' ⚠️ solicite cadastro':'')]]});y=doc.lastAutoTable.finalY+6;doc.autoTable({startY:y,styles:{fontSize:7},head:[['Afiliado','Código','%','Vendas','Gerado','A Pagar','Status','Titular','Banco','Agência','Conta','CPF/CNPJ','PIX']],body:rows});doc.save('nexvon-comissoes-'+new Date().toISOString().slice(0,10)+'.pdf');toast('PDF de Comissões gerado ('+rows.length+')!','success');}catch(e){toast('Erro: '+e.message,'error');}}
+if(localStorage.getItem('nf_admin')==='1')setupAdminTabs();
 
-/* === PDF exports (simplificado, usa dados locais) === */
-function exportPDF(){try{var doc=new window.jspdf.jsPDF('p','mm','a4');doc.setFontSize(16);doc.setTextColor(212,175,55);doc.text('NEXVON FLUENCY - Relatorio',14,20);var y=30;var sales=DB.sales;doc.autoTable({startY:y,head:[['ID','Data','Cliente','Valor','Status']],body:sales.map(function(s){return [s.id,s.date,s.client,BRL(s.value),s.status];})});doc.save('nexvon-relatorio.pdf');toast('PDF gerado!','success');}catch(e){toast('Erro PDF: '+e.message,'error');}}
-function exportSalesPDF(){exportPDF();}
-function exportAffiliatesPDF(){exportPDF();}
-function exportCommissionsPDF(){exportPDF();}
-
-if(localStorage.getItem('nf_admin')==='1'&&sessionStorage.getItem(ADMIN_PASS_KEY))setupAdminTabs();
+/* Sincronização Supabase em background */
+setInterval(function(){
+  try{
+    if(!supabase)return;
+    var ap=sessionStorage.getItem('nf_admin_pass');
+    if(!ap)return;
+    var payload={settings:{site:DB.settings},affiliates:DB.affiliates.map(function(a){var o={};for(var k in a){if(k!=='password'&&k!=='password_hash')o[k]=a[k];}if(a.password)o.password=a.password;return o;}),sales:DB.sales,clicks:DB.clicks,paidCommissions:DB.paidCommissions,operators:(DB.operators||[]).map(function(o){var r={};for(var k in o){if(k!=='password')r[k]=o[k];}if(o.password)r.password=o.password;return r;})};
+    sbRpc('admin_save_all',{admin_pass:ap,payload:payload}).catch(function(){});
+  }catch(e){}
+},15000);
+/* Load do servidor no início */
+window.addEventListener('load',function(){
+  try{
+    sbFrom('settings').select('value').eq('key','site').maybeSingle().then(function(r){if(r&&r.data&&r.data.value){DB.settings=Object.assign({},DB.settings,r.data.value);saveDBCache();}}).catch(function(){});
+    var ap=sessionStorage.getItem('nf_admin_pass');
+    if(ap&&localStorage.getItem('nf_admin')==='1'){sbRpc('admin_get_all',{admin_pass:ap}).then(function(r){if(r&&r.data&&!r.data.error){var all=r.data;if(all.settings&&all.settings.site)DB.settings=Object.assign({},DB.settings,all.settings.site);if(all.affiliates)DB.affiliates=all.affiliates;if(all.sales)DB.sales=all.sales;if(all.clicks)DB.clicks=all.clicks||{};if(all.paidCommissions)DB.paidCommissions=all.paidCommissions||{};if(all.operators)DB.operators=all.operators||[];saveDBCache();if(!document.getElementById('admin-dashboard').classList.contains('hidden'))renderAll();}}).catch(function(){});}
+  }catch(e){}
+});
+/* Lead submit: insert no Supabase */
+var _origSubmitLead=submitLead;
+submitLead=function(){_origSubmitLead();try{var n=document.getElementById('leadName').value;var e=document.getElementById('leadEmail').value;if(n&&e){sbFrom('sales').insert([{id:'L'+Date.now().toString().slice(-6),date:new Date().toISOString().slice(0,10),client:n,method:'Checkout',value:(parseInt(document.getElementById('leadQty').value)||1)*540,status:'pendente',lead_email:e,lead_whats:document.getElementById('leadWhats').value,lead_doc:document.getElementById('leadDoc').value,lead_qty:parseInt(document.getElementById('leadQty').value)||1}]).catch(function(){});}}catch(e){}};
 </script>
 </body>
 </html>

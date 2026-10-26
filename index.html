@@ -14,7 +14,19 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Loader robusto do Supabase — tenta 2 CDNs, senão avisa o usuário
+window._sbLoaded=false;window._sbError=false;
+function _sbFail(){if(!window._sbLoaded){window._sbError=true;
+document.addEventListener('DOMContentLoaded',function(){
+var b=document.createElement('div');
+b.style.cssText='position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:99999;background:#EF4444;color:#fff;padding:12px 24px;border-radius:10px;font-size:13px;font-weight:600;max-width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.5)';
+b.innerHTML='⚠️ Falha ao carregar o Supabase. Verifique sua internet e recarregue a página. (Modo offline ativado)';
+document.body.appendChild(b);setTimeout(function(){b.style.opacity='.7';},5000);
+});}}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onload="window._sbLoaded=true" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2';this.onload=function(){window._sbLoaded=true;};this.onerror=_sbFail;"></script>
+<noscript><style>body{font-family:sans-serif;padding:40px;text-align:center}</style><p>Este site precisa de JavaScript habilitado.</p></noscript>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
@@ -501,7 +513,30 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 // ============================================================
 const SUPABASE_URL = 'https://wpwmghgwqlrhvqjqfkav.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_jb5IABPi0WR7tYgu9Ico-Q_vFzRzo8Y';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabase = null;
+try {
+  if (window.supabase && window.supabase.createClient) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } else {
+    console.warn('Supabase não carregou — modo offline (cache local)');
+  }
+} catch(e) { console.warn('Erro ao iniciar Supabase:', e); }
+// Wrapper seguro: se supabase não carregou, retorna promises vazias
+function sbRpc(fn, params){ if(!supabase) return Promise.resolve({data:null,error:{message:'offline'}}); return sbRpc(fn, params); }
+function sbFrom(table){ if(!supabase) return {insert:()=>Promise.resolve({error:{message:'offline'}}), select:()=>({eq:()=>({maybeSingle:()=>Promise.resolve({data:null,error:{message:'offline'}})})})}; return supabase.from(table); }
+window._sbReady = !!supabase;
+
+// Tratamento de erro global — evita que um erro quebre todo o site
+window.addEventListener('error', function(e){
+  console.error('Erro JS:', e.message, e.filename, e.lineno);
+  try{
+    var t=document.getElementById('toast');
+    if(t && e.message && e.message.indexOf('supabase')<0 && e.message.indexOf('fetch')<0){
+      // só mostra erros não-rede para não assustar o usuário
+    }
+  }catch(err){}
+});
+window.addEventListener('unhandledrejection', function(e){ console.warn('Promise rejeitada:', e.reason); });
 
 const WA='5519997048175';
 const CHECKOUT='https://loja.infinitepay.io/alessandro-silva-icw/jjf3483-assinatura-nexvon-fluency';
@@ -535,7 +570,7 @@ async function syncToSupabase(){
         clicks:DB.clicks,
         paidCommissions:DB.paidCommissions
       };
-      const {error}=await supabase.rpc('admin_save_all',{admin_pass:adminPass,payload});
+      const {error}=await sbRpc('admin_save_all',{admin_pass:adminPass,payload});
       if(error)console.warn('sync erro:',error.message);
     }
   }catch(e){console.warn('sync falhou',e);}
@@ -559,7 +594,7 @@ function applyServerData(all){
 // Carregar settings públicos (preço, comissão, URL) ao abrir o site
 async function loadPublicSettings(){
   try{
-    const {data,error}=await supabase.from('settings').select('value').eq('key','site').maybeSingle();
+    const {data,error}=await sbFrom('settings').select('value').eq('key','site').maybeSingle();
     if(data&&data.value){DB.settings=Object.assign(DB.settings,data.value);if(DB.settings.siteUrl)SITE_URL=DB.settings.siteUrl;saveDBCache();}
   }catch(e){}
 }
@@ -575,7 +610,24 @@ function bankComplete(b){return !!(b&&b.holder&&b.cpf&&b.bankName&&b.agency&&b.a
 function bankText(b){if(!bankComplete(b))return '⚠️ Incompleto';return b.bankName+' · Ag:'+b.agency+' · Cta:'+b.account+' ('+(b.type==='poupanca'?'Poupança':b.type==='pagamento'?'Pagamento':'Corrente')+') · CPF:'+b.cpf+(b.pix?' · PIX:'+b.pix:'');}
 function next10(){const t=new Date();let d=new Date(t.getFullYear(),t.getMonth(),10);if(t.getDate()>10)d=new Date(t.getFullYear(),t.getMonth()+1,10);return d.toLocaleDateString('pt-BR');}
 
-function startVideo(){const box=document.getElementById('videoBox');if(!box)return;box.onclick=null;box.style.cursor='default';const v=document.createElement('video');v.controls=true;v.autoplay=true;v.loop=false;v.playsInline=true;v.style.cssText='width:100%;height:100%;object-fit:contain;background:#000';v.src='https://drive.google.com/uc?export=download&confirm=t&id=1zmNWNCY8ZMZHzyh3qYVF2vs6jgVvkiKR';v.onerror=function(){box.innerHTML='<iframe src="https://drive.google.com/file/d/1zmNWNCY8ZMZHzyh3qYVF2vs6jgVvkiKR/preview?autoplay=1" width="100%" height="100%" allow="autoplay; encrypted-media; fullscreen" allowfullscreen style="border:0"></iframe>';};box.innerHTML='';box.appendChild(v);}
+function startVideo(){
+  const box=document.getElementById('videoBox');if(!box)return;
+  box.onclick=null;box.style.cursor='default';box.innerHTML='';
+  // Tenta player de vídeo nativo primeiro; se não carregar em 3s, usa iframe do Google Drive
+  const v=document.createElement('video');
+  v.controls=true;v.autoplay=true;v.playsInline=true;
+  v.style.cssText='width:100%;height:100%;object-fit:contain;background:#000';
+  v.src='https://drive.google.com/uc?export=download&confirm=t&id=1zmNWNCY8ZMZHzyh3qYVF2vs6jgVvkiKR';
+  let fellBack=false;
+  function fallback(){
+    if(fellBack)return;fellBack=true;
+    box.innerHTML='<iframe src="https://drive.google.com/file/d/1zmNWNCY8ZMZHzyh3qYVF2vs6jgVvkiKR/preview?autoplay=1" width="100%" height="100%" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen style="border:0;width:100%;height:100%"></iframe>';
+  }
+  v.onerror=fallback;
+  // Timeout: se o vídeo não começar em 3.5s, força fallback para iframe (Google Drive costuma bloquear download direto)
+  setTimeout(function(){ try{ if(v.readyState < 2 && !fellBack){ fallback(); } }catch(e){ fallback(); } }, 3500);
+  box.appendChild(v);
+}
 function resetVideo(){const box=document.getElementById('videoBox');if(!box)return;box.onclick=null;box.style.cursor='default';
 box.innerHTML=`<div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6" style="background:linear-gradient(135deg,#050A14,#0A1629)">
 <div class="absolute inset-0 opacity-10" style="background-image:linear-gradient(rgba(212,175,55,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(212,175,55,.5) 1px,transparent 1px);background-size:44px 44px"></div>
@@ -593,7 +645,7 @@ toast('Vídeo finalizado. Garanta seu acesso!','info');}
 function replayVideo(){const box=document.getElementById('videoBox');if(!box)return;box.onclick=startVideo;box.style.cursor='pointer';startVideo();toast('Reproduzindo novamente...','info');}
 
 // Rastrear clique de afiliado (?ref=CODIGO) — salva no Supabase
-(function(){const p=new URLSearchParams(location.search);const ref=p.get('ref');if(ref){localStorage.setItem('nf_ref',ref);DB.clicks[ref]=(DB.clicks[ref]||0)+1;saveDBCache();supabase.rpc('increment_click',{aff_code:ref}).catch(()=>{});const a=DB.affiliates.find(x=>x.code.toUpperCase()===ref.toUpperCase());if(a){const b=document.createElement('div');b.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:60;background:#10B981;color:#fff;padding:8px 20px;border-radius:30px;font-size:13px;font-weight:600';b.innerHTML='🎁 Você foi indicado por <strong>'+a.name+'</strong>!';document.body.appendChild(b);setTimeout(()=>b.remove(),5000);}}})();
+(function(){const p=new URLSearchParams(location.search);const ref=p.get('ref');if(ref){localStorage.setItem('nf_ref',ref);DB.clicks[ref]=(DB.clicks[ref]||0)+1;saveDBCache();sbRpc('increment_click',{aff_code:ref}).catch(()=>{});const a=DB.affiliates.find(x=>x.code.toUpperCase()===ref.toUpperCase());if(a){const b=document.createElement('div');b.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:60;background:#10B981;color:#fff;padding:8px 20px;border-radius:30px;font-size:13px;font-weight:600';b.innerHTML='🎁 Você foi indicado por <strong>'+a.name+'</strong>!';document.body.appendChild(b);setTimeout(()=>b.remove(),5000);}}})();
 
 window.addEventListener('load',()=>{
   loadPublicSettings();
@@ -625,7 +677,7 @@ async function submitLead(){
   DB.sales.push(sale);saveDBCache();
   // Insere no Supabase
   try{
-    const {error}=await supabase.from('sales').insert([{
+    const {error}=await sbFrom('sales').insert([{
       id:sale.id,date:sale.date,client:sale.client,method:sale.method,value:sale.value,
       affiliate_id:affId||null,status:sale.status,lead_email:e,lead_whats:w,lead_doc:d,
       lead_qty:q,lead_birth:b||null
@@ -661,7 +713,7 @@ async function affLogin(){
   const pass=document.getElementById('loginPass').value;
   if(!code||!pass){toast('Digite código e senha.','error');return;}
   try{
-    const {data,error}=await supabase.rpc('affiliate_login',{aff_code:code,pass});
+    const {data,error}=await sbRpc('affiliate_login',{aff_code:code,pass});
     if(error){toast('Erro no servidor: '+error.message,'error');return;}
     if(!data||data.error){
       if(data&&data.error==='nao_encontrado')toast('Código não encontrado. Cadastre-se!','error');
@@ -676,7 +728,7 @@ async function affLogin(){
     if(data.status==='rejeitado'){toast('Cadastro recusado.','error');return;}
     data._password=pass; // guarda senha para atualizações próprias
     // Carrega dados completos do afiliado (vendas, saques, clicks)
-    const {data:full}=await supabase.rpc('affiliate_get_data',{aff_id:data.id,aff_pass:pass});
+    const {data:full}=await sbRpc('affiliate_get_data',{aff_id:data.id,aff_pass:pass});
     if(full&&!full.error){
       DB.sales=full.sales||[];
       DB.clicks[full.affiliate.code]=full.clicks||0;
@@ -705,7 +757,7 @@ async function affRegister(){
   let code=document.getElementById('regCode').value.trim().toUpperCase()||'NF'+Math.random().toString(36).slice(2,7).toUpperCase();
   const contact='WhatsApp: '+whats+(email?' / '+email:'');
   try{
-    const {data,error}=await supabase.rpc('affiliate_register',{p_name:name,p_contact:contact,p_code:code,p_pass:pass});
+    const {data,error}=await sbRpc('affiliate_register',{p_name:name,p_contact:contact,p_code:code,p_pass:pass});
     if(error){toast('Erro: '+error.message,'error');return;}
     if(data&&data.error==='codigo_existe'){toast('Código já existe. Escolha outro.','error');return;}
     const newId=data.id;
@@ -739,7 +791,7 @@ function saveKyc(){
       if(a){a.kyc=kycData;saveDBCache();}
       // Envia para o Supabase via affiliate_update
       if(_kycAffPass){
-        supabase.rpc('affiliate_update',{aff_id:_kycAffId,aff_pass:_kycAffPass,payload:{kyc:kycData}}).catch(e=>console.warn('kyc sync',e));
+        sbRpc('affiliate_update',{aff_id:_kycAffId,aff_pass:_kycAffPass,payload:{kyc:kycData}}).catch(e=>console.warn('kyc sync',e));
       }
       closeModal('kycModal');
       toast('KYC enviado! Aguarde aprovação.','success');
@@ -796,7 +848,7 @@ function startAffPolling(){
     try{
       const a=currentAff();if(!a)return;
       const pass=a._password;if(!pass)return;
-      const {data}=await supabase.rpc('affiliate_get_data',{aff_id:a.id,aff_pass:pass});
+      const {data}=await sbRpc('affiliate_get_data',{aff_id:a.id,aff_pass:pass});
       if(data&&!data.error){
         DB.sales=data.sales||[];
         DB.clicks[data.affiliate.code]=data.clicks||0;
@@ -841,7 +893,7 @@ async function saveBankProfile(){
   sessionStorage.setItem(AFF_SESS,JSON.stringify(updated));
   saveDBCache();
   // Sincroniza com Supabase
-  try{await supabase.rpc('affiliate_update',{aff_id:a.id,aff_pass:a._password,payload:{bank}});}catch(e){console.warn(e);}
+  try{await sbRpc('affiliate_update',{aff_id:a.id,aff_pass:a._password,payload:{bank}});}catch(e){console.warn(e);}
   toast('Dados bancários salvos! Saque liberado.','success');
   const wb=document.getElementById('withdrawBtn');
   wb.className='btn btn-gold btn-premium';wb.innerHTML='<i class="fa fa-money-bill-wave"></i> Solicitar Saque';
@@ -852,7 +904,7 @@ async function changeAffPass(){
   const p1=document.getElementById('affNewPass').value,p2=document.getElementById('affNewPass2').value;
   if(!p1||p1!==p2){toast('As senhas não coincidem.','error');return;}
   try{
-    const {data,error}=await supabase.rpc('affiliate_update',{aff_id:a.id,aff_pass:a._password,payload:{new_password:p1}});
+    const {data,error}=await sbRpc('affiliate_update',{aff_id:a.id,aff_pass:a._password,payload:{new_password:p1}});
     if(error){toast('Erro: '+error.message,'error');return;}
     const updated={...currentAff(),_password:p1};
     sessionStorage.setItem(AFF_SESS,JSON.stringify(updated));
@@ -877,7 +929,7 @@ async function confirmWithdraw(){
   sessionStorage.setItem(AFF_SESS,JSON.stringify(updated));
   saveDBCache();
   // Sincroniza saques com Supabase
-  try{await supabase.rpc('affiliate_update',{aff_id:a.id,aff_pass:a._password,payload:{withdrawals:DB.affiliates[idx].withdrawals}});}catch(e){console.warn(e);}
+  try{await sbRpc('affiliate_update',{aff_id:a.id,aff_pass:a._password,payload:{withdrawals:DB.affiliates[idx].withdrawals}});}catch(e){console.warn(e);}
   closeModal('withdrawModal');
   alert('✅ Seu saque de '+BRL(amount)+' foi solicitado com sucesso!\n\nFavor aguardar a data do próximo dia 10: '+next10()+'.\n\nO valor será depositado em sua conta bancária cadastrada.');
   showAffPanel(DB.affiliates[idx]);
@@ -888,7 +940,7 @@ async function confirmWithdraw(){
 async function adminLogin(){
   const pass=document.getElementById('adminPassInput').value;
   try{
-    const {data,error}=await supabase.rpc('admin_login',{pass});
+    const {data,error}=await sbRpc('admin_login',{pass});
     if(error){toast('Erro: '+error.message,'error');return;}
     if(data!=='ok'){toast('Senha incorreta','error');return;}
     sessionStorage.setItem(ADMIN_PASS_KEY,pass);
@@ -907,7 +959,7 @@ async function adminLogin(){
 async function refreshAdminFromServer(){
   const pass=sessionStorage.getItem(ADMIN_PASS_KEY);if(!pass)return;
   try{
-    const {data}=await supabase.rpc('admin_get_all',{admin_pass:pass});
+    const {data}=await sbRpc('admin_get_all',{admin_pass:pass});
     if(data&&!data.error)applyServerData(data);
   }catch(e){console.warn(e);}
 }
@@ -950,7 +1002,7 @@ async function changeAdminPass(){
   if(!p){toast('Digite uma senha.','error');return;}
   const oldPass=sessionStorage.getItem(ADMIN_PASS_KEY);
   try{
-    const {data,error}=await supabase.rpc('admin_change_pass',{old_pass:oldPass,new_pass:p});
+    const {data,error}=await sbRpc('admin_change_pass',{old_pass:oldPass,new_pass:p});
     if(error||data!=='ok'){toast('Erro ao alterar senha.','error');return;}
     sessionStorage.setItem(ADMIN_PASS_KEY,p);
     document.getElementById('newPass').value='';

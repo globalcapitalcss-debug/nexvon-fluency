@@ -106,33 +106,7 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 
 
 
-<hr class="border-white/10 my-6">
-<h3 class="text-xl font-bold text-gold mb-3"><i class="fa fa-user-shield mr-2"></i> Operadores do Painel</h3>
-<p class="text-sm text-gray-400 mb-3">Crie operadores com acesso limitado a módulos específicos. O admin master (usuário em branco) tem acesso total.</p>
-<button onclick="openOperatorModal()" class="btn btn-gold btn-premium mb-4"><i class="fa fa-plus mr-1"></i> Novo Operador</button>
-<div class="card-premium p-4 overflow-x-auto">
-  <table class="w-full text-sm">
-    <thead><tr class="text-left text-gray-400 border-b border-white/10"><th class="py-2">Nome</th><th>Usuário</th><th>Permissões</th><th>Status</th><th>Ações</th></tr></thead>
-    <tbody id="operatorsTable"></tbody>
-  </table>
-</div>
-<div id="operatorModal" class="modal-overlay"><div class="modal-content max-w-md">
-  <div class="flex justify-between items-center mb-4"><h3 id="operatorModalTitle" class="text-lg font-bold text-gold">Novo Operador</h3><button onclick="closeModal('operatorModal')" class="text-gray-400 text-xl">&times;</button></div>
-  <div class="space-y-3">
-    <input type="hidden" id="opId"><input type="text" id="opName" placeholder="Nome completo" class="input-premium w-full"><input type="text" id="opUsername" placeholder="Usuário" class="input-premium w-full">
-    <div class="pass-wrap"><input type="password" id="opPass" placeholder="Senha" class="input-premium w-full"><button type="button" class="eye-btn" onclick="togglePass('opPass',this)"><i class="fa fa-eye"></i></button></div>
-    <div class="grid grid-cols-2 gap-2 text-sm">
-      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="vendas" checked> Vendas</label>
-      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="afiliados" checked> Afiliados</label>
-      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="comissoes" checked> Comissões</label>
-      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="relatorios"> Relatórios</label>
-      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="configuracoes"> Configurações</label>
-      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="operadores"> Operadores</label>
-    </div>
-    <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="opActive" checked> Ativo</label>
-    <button onclick="saveOperator()" class="btn btn-gold w-full justify-center py-3">Salvar</button>
-  </div>
-</div></div>
+
 <div id="toast" class="toast"></div>
 
 <div id="page-home" class="page-section active">
@@ -411,6 +385,24 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 </div>
 
 <div id="page-admin" class="page-section">
+<div id="operatorModal" class="modal-bg"><div class="modal-content max-w-md">
+  <div class="flex justify-between items-center mb-4"><h3 id="operatorModalTitle" class="text-lg font-bold text-gold">Novo Operador</h3><button onclick="closeModal('operatorModal')" class="text-gray-400 text-xl">&times;</button></div>
+  <div class="space-y-3">
+    <input type="hidden" id="opId"><input type="text" id="opName" placeholder="Nome completo" class="input-premium w-full"><input type="text" id="opUsername" placeholder="Usuário" class="input-premium w-full">
+    <div class="pass-wrap"><input type="password" id="opPass" placeholder="Senha" class="input-premium w-full"><button type="button" class="eye-btn" onclick="togglePass('opPass',this)"><i class="fa fa-eye"></i></button></div>
+    <div class="grid grid-cols-2 gap-2 text-sm">
+      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="vendas" checked> Vendas</label>
+      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="afiliados" checked> Afiliados</label>
+      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="comissoes" checked> Comissões</label>
+      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="relatorios"> Relatórios</label>
+      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="configuracoes"> Configurações</label>
+      <label class="flex items-center gap-2 bg-black/30 p-2 rounded-lg"><input type="checkbox" class="op-perm" value="operadores"> Operadores</label>
+    </div>
+    <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="opActive" checked> Ativo</label>
+    <button onclick="saveOperator()" class="btn btn-gold w-full justify-center py-3">Salvar</button>
+  </div>
+</div></div>
+
 <div class="pt-24 pb-20 px-4 min-h-screen container mx-auto max-w-5xl">
 <button onclick="showPage('home')" class="mb-6 text-nexvon-silver hover:text-white flex items-center gap-2"><i class="fa fa-arrow-left"></i> Voltar ao site</button>
 <div id="admin-login" class="max-w-md mx-auto card-premium p-8">
@@ -455,6 +447,16 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 <div class="glass rounded-xl overflow-x-auto"><table class="adm-table"><thead><tr><th>Afiliado</th><th>Vendas</th><th>%</th><th>Gerado (BRL)</th><th>A Pagar</th><th>Status</th><th>Dados Bancários (para pagamento)</th><th>Ações</th></tr></thead><tbody id="commTable"></tbody></table></div>
 </div>
 <div id="adm-settings" class="adm-content hidden">
+<div class="mb-6">
+<hr class="border-white/10 my-4">
+<h3 class="text-xl font-bold text-gold mb-3"><i class="fa fa-user-shield mr-2"></i> Operadores do Painel</h3>
+<p class="text-sm text-gray-400 mb-3">Crie operadores com acesso limitado. Apenas o admin master pode gerenciar.</p>
+<button onclick="openOperatorModal()" class="btn btn-gold btn-premium mb-4"><i class="fa fa-plus mr-1"></i> Novo Operador</button>
+<div class="card-premium p-4 overflow-x-auto">
+  <table class="w-full text-sm"><thead><tr class="text-left text-gray-400 border-b border-white/10"><th class="py-2">Nome</th><th>Usuário</th><th>Permissões</th><th>Status</th><th>Ações</th></tr></thead><tbody id="operatorsTable"></tbody></table>
+</div>
+</div>
+
 <div class="grid md:grid-cols-2 gap-5">
 <div class="card-premium p-5"><h4 class="font-bold mb-4 text-gold font-display">🔐 Alterar Senha Admin</h4><div class="pass-wrap"><input type="password" id="newPass" placeholder="Nova senha" class="mb-3"><button type="button" class="eye-btn" onclick="togglePass('newPass',this)"><i class="fa fa-eye"></i></button></div><button class="btn btn-gold btn-premium" onclick="changeAdminPass()">Salvar Senha</button></div>
 <div class="card-premium p-5"><h4 class="font-bold mb-4 text-gold font-display">💰 Comissão Padrão (%)</h4><input type="number" id="defComm" value="20" class="mb-3"><button class="btn btn-gold btn-premium" onclick="saveDefComm()">Salvar</button></div>
@@ -626,7 +628,23 @@ function requestWithdraw(){const a=currentAff();if(!a)return;const b=a.bank||{};
 function confirmWithdraw(){const a=currentAff();if(!a)return;const idx=DB.affiliates.findIndex(x=>x.id===a.id);const rate=a.commission||DB.settings.defaultCommission;const sales=DB.sales.filter(s=>s.affiliateId===a.id&&s.status==='pago');const earned=sales.reduce((t,s)=>t+s.value,0)*rate/100;const withdrawn=(DB.affiliates[idx].withdrawals||[]).reduce((t,w)=>t+w.amount,0);const amount=earned-withdrawn;if(!DB.affiliates[idx].withdrawals)DB.affiliates[idx].withdrawals=[];DB.affiliates[idx].withdrawals.push({id:'S'+Date.now(),amount,date:new Date().toLocaleDateString('pt-BR'),payDate:next10(),status:'solicitado'});sessionStorage.setItem(AFF_SESS,JSON.stringify(DB.affiliates[idx]));saveDB();closeModal('withdrawModal');alert('✅ Seu saque de '+BRL(amount)+' foi solicitado com sucesso!\n\nFavor aguardar a data do próximo dia 10: '+next10()+'.\n\nO valor será depositado em sua conta bancária cadastrada.');showAffPanel(DB.affiliates[idx]);document.querySelector('[data-afftab="saques"]').click();}
 function adminLogin(){var pass=document.getElementById('adminPassInput').value;var username=(document.getElementById('adminUserInput')||{value:''}).value.trim();
 if(username){sbRpc('operator_login',{op_username:username,pass:pass}).then(function(r){var d=r&&r.data;var err=r&&r.error;if(err&&err.message!=='offline'){toast('Erro: '+err.message,'error');return;}if(!d||d.error){var op=(DB.operators||[]).find(function(o){return o.username===username&&o.password===pass&&o.active!==false;});if(op){sessionStorage.setItem(OP_SESS,JSON.stringify({id:op.id,name:op.name,username:op.username,permissions:op.permissions||[]}));localStorage.setItem('nf_admin','1');document.getElementById('admin-login').classList.add('hidden');document.getElementById('admin-dashboard').classList.remove('hidden');toast('Bem-vindo, '+op.name+'!','success');renderAll();return;}toast('Usuário ou senha incorretos.','error');return;}sessionStorage.setItem(OP_SESS,JSON.stringify({id:d.id,name:d.name,username:d.username,permissions:d.permissions||[]}));localStorage.setItem('nf_admin','1');document.getElementById('admin-login').classList.add('hidden');document.getElementById('admin-dashboard').classList.remove('hidden');toast('Bem-vindo, '+d.name+'!','success');renderAll();}).catch(function(){toast('Erro de conexão.','error');});return;}
-sessionStorage.removeItem(OP_SESS);var pass=document.getElementById('adminPassInput').value;if(document.getElementById('adminPassInput').value===getPass()){localStorage.setItem('nf_admin','1');document.getElementById('admin-login').classList.add('hidden');document.getElementById('admin-dashboard').classList.remove('hidden');document.getElementById('setSiteUrl').value=DB.settings.siteUrl||SITE_URL;document.getElementById('defComm').value=DB.settings.defaultCommission||20;toast('Acesso liberado!','success');renderAll();setupAdminTabs();}else toast('Senha incorreta','error');}
+sessionStorage.removeItem(OP_SESS);var pass=document.getElementById('adminPassInput').value;
+sbRpc('admin_login',{pass:pass}).then(function(r){
+  var data=r&&r.data;var err=r&&r.error;
+  var okLocal=(pass===getPass());
+  if(data==='ok'||okLocal||(err&&err.message==='offline'&&okLocal)){
+    sessionStorage.setItem('nf_admin_pass',pass);localStorage.setItem('nf_admin','1');
+    document.getElementById('admin-login').classList.add('hidden');document.getElementById('admin-dashboard').classList.remove('hidden');
+    document.getElementById('setSiteUrl').value=DB.settings.siteUrl||SITE_URL;
+    document.getElementById('defComm').value=DB.settings.defaultCommission||20;
+    toast('Acesso liberado!','success');renderAll();setupAdminTabs();
+  }else{ toast('Senha incorreta','error'); }
+}).catch(function(){
+  if(pass===getPass()){sessionStorage.setItem('nf_admin_pass',pass);localStorage.setItem('nf_admin','1');
+    document.getElementById('admin-login').classList.add('hidden');document.getElementById('admin-dashboard').classList.remove('hidden');
+    toast('Acesso liberado (offline)!','success');renderAll();setupAdminTabs();}
+  else toast('Senha incorreta','error');
+});}
 function adminLogout(){localStorage.removeItem('nf_admin');location.reload();}
 function setupAdminTabs(){document.querySelectorAll('.admin-tab').forEach(t=>{t.onclick=()=>{document.querySelectorAll('.admin-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.querySelectorAll('.adm-content').forEach(c=>c.classList.add('hidden'));document.getElementById('adm-'+t.dataset.tab).classList.remove('hidden');renderAll();};});}
 function renderAll(){try{renderOperators();}catch(e){}renderDashboard();renderSales();renderAffCards();renderComm();const fa=document.getElementById('fltAff');if(fa)fa.innerHTML='<option value="">Todos afiliados</option>'+DB.affiliates.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');}

@@ -700,7 +700,7 @@ function safeSync(){
           if(srv.operators)srv.operators.forEach(function(so){if(!(DB.operators||[]).find(function(o){return o.id===so.id;})){if(!DB.operators)DB.operators=[];DB.operators.push(so);}});
           if(srv.clicks){for(var c in srv.clicks)if(!(c in DB.clicks))DB.clicks[c]=srv.clicks[c];}
           if(srv.settings&&srv.settings.site)DB.settings=Object.assign({},DB.settings,srv.settings.site);
-          saveDBCache();
+          saveDB();
           if(!document.getElementById('admin-dashboard').classList.contains('hidden')){try{renderAll();}catch(e){}}
         }
         /* Envia o merge (agora inclui registros novos do servidor) */
@@ -714,7 +714,7 @@ setInterval(safeSync,20000);
 /* Load do servidor no início */
 window.addEventListener('load',function(){
   try{
-    sbFrom('settings').select('value').eq('key','site').maybeSingle().then(function(r){if(r&&r.data&&r.data.value){DB.settings=Object.assign({},DB.settings,r.data.value);saveDBCache();}}).catch(function(){});
+    sbFrom('settings').select('value').eq('key','site').maybeSingle().then(function(r){if(r&&r.data&&r.data.value){DB.settings=Object.assign({},DB.settings,r.data.value);saveDB();}}).catch(function(){});
     var ap=sessionStorage.getItem('nf_admin_pass');
     if(ap&&localStorage.getItem('nf_admin')==='1'){sbRpc('admin_get_all',{admin_pass:ap}).then(function(r){if(r&&r.data&&!r.data.error){var all=r.data;if(all.settings&&all.settings.site)DB.settings=Object.assign({},DB.settings,all.settings.site);if(all.affiliates){
       /* MERGE: servidor prevalece para IDs existentes, adiciona novos */
@@ -725,7 +725,7 @@ window.addEventListener('load',function(){
       var sids={};DB.sales.forEach(function(s){sids[s.id]=s;});
       all.sales.forEach(function(ss){sids[ss.id]=ss;});
       DB.sales=Object.keys(sids).map(function(k){return sids[k];});
-    }if(all.clicks)DB.clicks=all.clicks||{};if(all.paidCommissions)DB.paidCommissions=all.paidCommissions||{};if(all.operators)DB.operators=all.operators||[];saveDBCache();if(!document.getElementById('admin-dashboard').classList.contains('hidden'))renderAll();}}).catch(function(){});}
+    }if(all.clicks)DB.clicks=all.clicks||{};if(all.paidCommissions)DB.paidCommissions=all.paidCommissions||{};if(all.operators)DB.operators=all.operators||[];saveDB();if(!document.getElementById('admin-dashboard').classList.contains('hidden'))renderAll();}}).catch(function(){});}
   }catch(e){}
 });
 /* Lead submit: insert no Supabase */
@@ -746,7 +746,7 @@ setInterval(function(){
       if(all.clicks)DB.clicks=Object.assign({},all.clicks,DB.clicks);
       if(all.paidCommissions)DB.paidCommissions=all.paidCommissions||{};
       if(all.operators){var oids={};(DB.operators||[]).forEach(function(o){oids[o.id]=o;});all.operators.forEach(function(so){oids[so.id]=so;});DB.operators=Object.keys(oids).map(function(k){return oids[k];});}
-      saveDBCache();
+      saveDB();
       try{renderAll();}catch(e){}
     }).catch(function(){});
   }catch(e){}

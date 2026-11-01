@@ -14,16 +14,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script>window._sbOK=false;window._sbConn=false;window._sbLastErr='';function _sbStatus(msg,ok){if(!document.body){setTimeout(function(){_sbStatus(msg,ok);},200);return;}var id='_sb_conn_badge';var b=document.getElementById(id);if(!b){b=document.createElement('div');b.id=id;b.style.cssText='position:fixed;top:60px;right:16px;z-index:99999;color:#fff;padding:8px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px;box-shadow:0 4px 14px rgba(0,0,0,.4);transition:all .3s;max-width:60%;text-align:center';document.body.appendChild(b);}b.style.background=ok?'#10B981':'#EF4444';b.textContent=msg;if(ok){setTimeout(function(){var el=document.getElementById(id);if(el){el.style.opacity='0';setTimeout(function(){if(el&&el.parentNode)el.parentNode.removeChild(el);},600);}},4000);}}
-function _sbWarn(){if(!window._sbOK){_sbStatus('Supabase offline — cache local',false);}}
-var _SB_ESM=['https://esm.sh/@supabase/supabase-js@2.45.4','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm','https://esm.sh/@supabase/supabase-js@2','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm','https://esm.run/@supabase/supabase-js@2'];
-var _SB_UMD=['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.7/dist/umd/supabase.min.js','https://unpkg.com/@supabase/supabase-js@1.35.7/dist/umd/supabase.min.js'];
-var _sbEsmIdx=0;var _sbUmdIdx=0;
-function _sbGot(mod){if(mod&&typeof mod.createClient==='function'){window.supabase=mod;window._sbOK=true;return true;}return false;}
-function _sbFail(){var e=window._sbLastErr||'todas as fontes falharam';_sbStatus('Supabase offline ('+e.slice(0,40)+')',false);}
-function _sbTryUMD(){if(_sbUmdIdx>=_SB_UMD.length){_sbFail();return;}var url=_SB_UMD[_sbUmdIdx++];var s=document.createElement('script');s.src=url;s.onload=function(){if(window.supabase&&typeof window.supabase.createClient==='function'){window._sbOK=true;}else{_sbTryUMD();}};s.onerror=function(){_sbTryUMD();};document.head.appendChild(s);}
-function _sbTryESM(){if(_sbEsmIdx>=_SB_ESM.length){_sbTryUMD();return;}var url=_SB_ESM[_sbEsmIdx++];try{import(url).then(function(mod){if(!_sbGot(mod)){_sbTryESM();}}).catch(function(e){window._sbLastErr=String(e&&e.message||e);_sbTryESM();});}catch(e){window._sbLastErr=String(e&&e.message||e);_sbTryESM();}}
-if(!(window.supabase&&typeof window.supabase.createClient==='function')){_sbTryESM();}else{window._sbOK=true;}</script>
+<script>window._sbOK=true;window._sbConn=false;window._sbLastErr='';function _sbStatus(msg,ok){if(!document.body){setTimeout(function(){_sbStatus(msg,ok);},200);return;}var id='_sb_conn_badge';var b=document.getElementById(id);if(!b){b=document.createElement('div');b.id=id;b.style.cssText='position:fixed;top:60px;right:16px;z-index:99999;color:#fff;padding:8px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px;box-shadow:0 4px 14px rgba(0,0,0,.4);transition:all .3s;max-width:60%;text-align:center';document.body.appendChild(b);}b.style.background=ok?'#10B981':'#EF4444';b.textContent=msg;if(ok){setTimeout(function(){var el=document.getElementById(id);if(el){el.style.opacity='0';setTimeout(function(){if(el&&el.parentNode)el.parentNode.removeChild(el);},600);}},4000);}}
+function _sbWarn(){if(!window._sbOK){_sbStatus('Supabase offline — cache local',false);}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
@@ -542,14 +534,21 @@ input:focus,select:focus,textarea:focus{border-color:#D4AF37;box-shadow:0 0 0 3p
 var SUPABASE_URL='https://wpwmghgwqlrhvqjqfkav.supabase.co'; /* ex: https://SEU-PROJETO.supabase.co */
 var SUPABASE_ANON_KEY='sb_publishable_jb5IABPi0WR7tYgu9Ico-Q_vFzRzo8Y'; /* anon/publishable key publica */
 /* ========================================================================================== */
-var supabase=null;
-function _sbInit(){try{if(window.supabase&&typeof window.supabase.createClient==='function'){supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});return true;}}catch(e){console.warn('SB init:',e);window._sbLastErr=String(e&&e.message||e);}return false;}
-/* Teste de conexão com retry (15x / 2s = 30s) — espera ESM carregar */
-var _sbTestAttempts=0;
-function _sbTestConn(){if(!supabase){if(window._sbOK||(window.supabase&&typeof window.supabase.createClient==='function')){_sbInit();}if(!supabase){_sbTestAttempts++;if(_sbTestAttempts<15){setTimeout(_sbTestConn,2000);}else{_sbStatus('Supabase: biblioteca não carregou',false);}return;}}try{supabase.from('settings').select('key').limit(1).then(function(r){if(r&&r.error){if(r.error.message&&(r.error.message.indexOf('JWT')>=0||r.error.message.indexOf('API key')>=0)){_sbStatus('Chave Supabase inválida',false);}else{window._sbConn=true;_sbStatus('Supabase conectado',true);}}else{window._sbConn=true;_sbStatus('Supabase conectado',true);}}).catch(function(e){window._sbLastErr=String(e&&e.message||e);_sbStatus('Supabase offline — cache local',false);});}catch(e){window._sbLastErr=String(e&&e.message||e);_sbStatus('Erro: '+String(e&&e.message||e).slice(0,40),false);}}
-setTimeout(_sbTestConn,2000);
-function sbRpc(fn,p){if(!supabase){if(window._sbOK)_sbInit();if(!supabase)return Promise.resolve({data:null,error:{message:'offline'}});}try{return supabase.rpc(fn,p);}catch(e){return Promise.resolve({data:null,error:{message:e.message}});}}
-function sbFrom(t){if(!supabase){if(window._sbOK)_sbInit();if(!supabase)return{insert:function(){return Promise.resolve({error:{message:'offline'}});},select:function(){return{eq:function(){return{maybeSingle:function(){return Promise.resolve({data:null,error:{message:'offline'}});}};}};}};}return supabase.from(t);}
+var supabase={_native:true}; /* cliente fetch nativo — sem dependências externas */
+function _sbHdrs(){return{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json','Prefer':'return=representation'};}
+function _sbHdrsIns(){return{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'};} /* insert sem return=representation evita erro RLS 401 no read-back */
+function _sbParse(res){return res.text().then(function(t){var d=null;try{d=t?JSON.parse(t):null;}catch(e){d=t;}if(res.ok)return{data:d,error:null};var msg=(d&&(d.message||d.error||d.msg))||('HTTP '+res.status);return{data:null,error:{message:msg}};});}
+function _sbInit(){return true;}
+function sbRpc(fn,p){return fetch(SUPABASE_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:_sbHdrs(),body:JSON.stringify(p||{})}).then(_sbParse).catch(function(){return{data:null,error:{message:'offline'}};});}
+function _SbQ(url,hdrs){this.url=url;this.hdrs=hdrs;this._single=false;}
+_SbQ.prototype.limit=function(n){this.url+='&limit='+n;return this;};
+_SbQ.prototype.eq=function(c,v){this.url+='&'+encodeURIComponent(c)+'=eq.'+encodeURIComponent(v);return this;};
+_SbQ.prototype.maybeSingle=function(){this._single=true;return this;};
+_SbQ.prototype.then=function(resolve,reject){var self=this;return fetch(this.url,{headers:this.hdrs}).then(_sbParse).then(function(r){if(r&&!r.error&&self._single&&Array.isArray(r.data))r.data=r.data.length?r.data[0]:null;return r;}).catch(function(){return{data:null,error:{message:'offline'}};}).then(resolve,reject);};
+function sbFrom(t){var base=SUPABASE_URL+'/rest/v1/'+t;return{insert:function(rows){return fetch(base,{method:'POST',headers:_sbHdrsIns(),body:JSON.stringify(rows)}).then(_sbParse).catch(function(){return{data:null,error:{message:'offline'}};});},select:function(cols){return new _SbQ(base+'?select='+encodeURIComponent(cols||'*'),_sbHdrs());}};}
+/* Teste de conexão via fetch nativo — rápido e sem dependências */
+function _sbTestConn(){fetch(SUPABASE_URL+'/rest/v1/settings?select=key&limit=1',{headers:_sbHdrs()}).then(_sbParse).then(function(r){if(r&&r.error){if(r.error.message&&(r.error.message.indexOf('JWT')>=0||r.error.message.indexOf('API key')>=0||r.error.message.indexOf('401')>=0)){_sbStatus('Chave Supabase inválida',false);}else{window._sbConn=true;_sbStatus('Supabase conectado',true);}}else{window._sbConn=true;_sbStatus('Supabase conectado',true);}}).catch(function(){_sbStatus('Supabase offline — cache local',false);});}
+setTimeout(_sbTestConn,800);
 /* ===== SINCRONIZACAO SUPABASE — fonte unica da verdade (v5) ===== */
 var _PENDING_KEY='nf_pending_writes';
 function _pending(){try{return JSON.parse(localStorage.getItem(_PENDING_KEY)||'[]');}catch(e){return[];}}
